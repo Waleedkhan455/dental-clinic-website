@@ -6,15 +6,23 @@ saved with ``pending`` status — it becomes ``confirmed`` only when a doctor
 approves it from the panel.
 """
 
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.db.repository import to_object_id
 from app.dependencies import require_role
-from app.models.appointment import AppointmentDetail, AppointmentPublic, BookingRequest
+from app.models.appointment import (
+    AppointmentAdminUpdate,
+    AppointmentDetail,
+    AppointmentPublic,
+    BookingRequest,
+)
 from app.models.common import AppointmentStatus, UserRole, utcnow
 from app.models.user import UserInDB
 from app.repositories import appointments_repo, doctors_repo, services_repo
 from app.services.booking import (
+    CLINIC_TZ,
     BookingError,
     to_utc,
     validate_availability,
@@ -164,3 +172,123 @@ async def create_appointment(
     created = await repo.get(new_id)
     assert created is not None  # just inserted
     return created
+
+
+# --- Doctor / admin endpoints -----------------------------------------------
+
+
+def _day_range_utc(day: str) -> tuple[datetime, datetime]:
+    """UTC [start, end) covering one clinic-local calendar day (YYYY-MM-DD)."""
+    start_local = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=CLINIC_TZ)
+    start_utc = start_local.astimezone(timezone.utc)
+    return start_utc, start_utc + timedelta(days=1)
+
+
+@router.get("", response_model=list[AppointmentDetail])
+async def list_appointments(
+    doctor_id: str | None = None,
+    status_filter: AppointmentStatus | None = None,
+    day: str | None = None,
+    _: UserInDB = Depends(require_role(UserRole.DOCTOR)),
+) -> list[AppointmentDetail]:
+    """All appointments (doctor/admin), optionally filtered by doctor, status, day."""
+    query: dict = {}
+    if doctor_id:
+        oid = to_object_id(doctor_id)
+        if oid is not None:
+            query["doctor_id"] = oid
+    if status_filter is not None:
+        query["status"] = status_filter.value
+    if day:
+        try:
+            start, end = _day_range_utc(day)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid day; expected YYYY-MM-DD.",
+            ) from exc
+        query["scheduled_at"] = {"$gte": start, "$lt": end}
+
+    appointments = await appointments_repo().list(query, sort=[("scheduled_at", 1)])
+    return await _enrich(appointments)
+
+
+@router.get("/stats")
+async def appointment_stats(
+    _: UserInDB = Depends(require_role(UserRole.DOCTOR)),
+) -> dict[str, int]:
+    """Headline counts for the doctor dashboard."""
+    repo = appointments_repo()
+    now = utcnow()
+    today_start, today_end = _day_range_utc(now.astimezone(CLINIC_TZ).strftime("%Y-%m-%d"))
+    return {
+        "today": await repo.count(
+            {
+                "scheduled_at": {"$gte": today_start, "$lt": today_end},
+                "status": {"$ne": AppointmentStatus.CANCELLED.value},
+            }
+        ),
+        "pending": await repo.count({"status": AppointmentStatus.PENDING.value}),
+        "upcoming_confirmed": await repo.count(
+            {"status": AppointmentStatus.CONFIRMED.value, "scheduled_at": {"$gte": now}}
+        ),
+        "total": await repo.count({}),
+    }
+
+
+@router.patch("/{appointment_id}", response_model=AppointmentDetail)
+async def update_appointment(
+    appointment_id: str,
+    body: AppointmentAdminUpdate,
+    _: UserInDB = Depends(require_role(UserRole.DOCTOR)),
+) -> AppointmentDetail:
+    """Confirm/complete/cancel or reschedule an appointment (doctor/admin)."""
+    repo = appointments_repo()
+    appointment = await repo.get(appointment_id)
+    if appointment is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
+        )
+
+    changes: dict = {"updated_at": utcnow()}
+    if body.status is not None:
+        changes["status"] = body.status.value
+    if body.notes is not None:
+        changes["notes"] = body.notes
+
+    if body.scheduled_at is not None:
+        # Rescheduling re-applies the booking rules and re-checks the slot.
+        doctor = await doctors_repo().get(appointment.doctor_id)
+        if doctor is not None:
+            try:
+                validate_not_in_past(body.scheduled_at)
+                validate_availability(doctor.availability, body.scheduled_at)
+            except BookingError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+                ) from exc
+        scheduled_utc = to_utc(body.scheduled_at)
+        clash = await repo.find_one(
+            {
+                "_id": {"$ne": to_object_id(appointment_id)},
+                "doctor_id": to_object_id(appointment.doctor_id),
+                "scheduled_at": scheduled_utc,
+                "status": {
+                    "$in": [
+                        AppointmentStatus.PENDING.value,
+                        AppointmentStatus.CONFIRMED.value,
+                    ]
+                },
+            }
+        )
+        if clash is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="That time slot is already booked with this doctor.",
+            )
+        changes["scheduled_at"] = scheduled_utc
+
+    await repo.update_by_id(appointment_id, changes)
+    updated = await repo.get(appointment_id)
+    assert updated is not None
+    return (await _enrich([updated]))[0]

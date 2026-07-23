@@ -21,8 +21,25 @@ class PatientHistoryBase(BaseModel):
     attachments: list[str] = Field(default_factory=list)
 
 
-class PatientHistoryCreate(PatientHistoryBase):
-    pass
+class PatientHistoryCreate(BaseModel):
+    """Admin create payload for a treatment record."""
+
+    patient_id: PyObjectId
+    doctor_id: PyObjectId
+    appointment_id: PyObjectId | None = None
+    treatment: str = Field(min_length=1, max_length=200)
+    notes: str | None = Field(default=None, max_length=4000)
+    attachments: list[str] = Field(default_factory=list)
+
+
+class PatientHistoryUpdate(BaseModel):
+    """Admin update payload — every field optional (partial update)."""
+
+    doctor_id: PyObjectId | None = None
+    appointment_id: PyObjectId | None = None
+    treatment: str | None = Field(default=None, min_length=1, max_length=200)
+    notes: str | None = Field(default=None, max_length=4000)
+    attachments: list[str] | None = None
 
 
 class PatientHistoryPublic(MongoModel, PatientHistoryBase):
@@ -35,3 +52,10 @@ class PatientHistoryDetail(PatientHistoryPublic):
 
     doctor_name: str | None = None
     doctor_designation: str | None = None
+
+
+class PatientHistoryAdminDetail(PatientHistoryDetail):
+    """Doctor-panel view — also carries the patient's name/phone for display."""
+
+    patient_name: str | None = None
+    patient_phone: str | None = None

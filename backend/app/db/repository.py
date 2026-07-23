@@ -68,3 +68,11 @@ class Repository(Generic[ModelT]):
             return False
         result = await self.collection.update_one({"_id": oid}, {"$set": changes})
         return result.matched_count > 0
+
+    async def delete_by_id(self, id: str) -> bool:
+        """Delete one document by id. Returns True if a document was removed."""
+        oid = to_object_id(id)
+        if oid is None:
+            return False
+        result = await self.collection.delete_one({"_id": oid})
+        return result.deleted_count > 0

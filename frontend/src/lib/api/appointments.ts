@@ -53,6 +53,82 @@ export function cancelAppointment(id: string, token: string): Promise<Appointmen
   });
 }
 
+// --- Doctor / admin ---------------------------------------------------------
+
+export interface AppointmentStats {
+  today: number;
+  pending: number;
+  upcoming_confirmed: number;
+  total: number;
+}
+
+export interface AppointmentFilters {
+  doctor_id?: string;
+  status?: AppointmentStatus;
+  day?: string; // YYYY-MM-DD (clinic-local)
+}
+
+export interface AppointmentUpdateInput {
+  status?: AppointmentStatus;
+  scheduled_at?: string;
+  notes?: string;
+}
+
+/** All appointments (doctor/admin), optionally filtered. */
+export function getAllAppointments(
+  filters: AppointmentFilters,
+  token: string,
+): Promise<AppointmentDetail[]> {
+  const params = new URLSearchParams();
+  if (filters.doctor_id) params.set("doctor_id", filters.doctor_id);
+  if (filters.status) params.set("status_filter", filters.status);
+  if (filters.day) params.set("day", filters.day);
+  const qs = params.toString();
+  return apiFetch<AppointmentDetail[]>(`/api/appointments${qs ? `?${qs}` : ""}`, { token });
+}
+
+/** Headline counts for the doctor dashboard. */
+export function getAppointmentStats(token: string): Promise<AppointmentStats> {
+  return apiFetch<AppointmentStats>("/api/appointments/stats", { token });
+}
+
+/** Confirm/complete/cancel or reschedule an appointment (doctor/admin). */
+export function updateAppointment(
+  id: string,
+  input: AppointmentUpdateInput,
+  token: string,
+): Promise<AppointmentDetail> {
+  return apiFetch<AppointmentDetail>(`/api/appointments/${id}`, {
+    method: "PATCH",
+    body: input,
+    token,
+  });
+}
+
+/** Local calendar date as YYYY-MM-DD (clinic runs in PKT, matching the browser). */
+function localDayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+export interface DoctorDashboardData {
+  stats: AppointmentStats;
+  today: AppointmentDetail[];
+  pending: AppointmentDetail[];
+}
+
+/** One-shot fetch for the doctor dashboard: counts, today's list, pending list. */
+export async function getDoctorDashboard(token: string): Promise<DoctorDashboardData> {
+  const [stats, today, pending] = await Promise.all([
+    getAppointmentStats(token),
+    getAllAppointments({ day: localDayISO() }, token),
+    getAllAppointments({ status: "pending" }, token),
+  ]);
+  return { stats, today, pending };
+}
+
 /**
  * Split appointments into upcoming vs past.
  * Upcoming = still active (pending/confirmed) and not in the past.

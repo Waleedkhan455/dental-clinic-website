@@ -15,6 +15,7 @@ from app.routers import (
     gallery,
     history,
     meta,
+    patients,
     services,
     testimonials,
 )
@@ -28,5 +29,6 @@ api_router.include_router(testimonials.router)
 api_router.include_router(gallery.router)
 api_router.include_router(appointments.router)
 api_router.include_router(history.router)
+api_router.include_router(patients.router)
 
 __all__ = ["api_router"]

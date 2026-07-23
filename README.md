@@ -104,5 +104,9 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
 - [x] **Phase 6 — Patient panel:** dashboard with upcoming appointments, in-panel
       booking, upcoming/past appointments with cancel, read-only treatment history,
       profile view/edit — every query scoped to the signed-in patient (data isolation).
-- [ ] Phase 7 — Doctor / admin panel
+- [x] **Phase 7 — Doctor / admin panel:** dashboard (today's schedule, pending
+      requests, counts); appointments management (filter by dentist/status/day,
+      confirm, reschedule, cancel, mark complete); full CRUD for patient history,
+      services, team, testimonials, and gallery — all reflected live on the public
+      site; every admin endpoint role-guarded on the server.
 - [ ] Phase 8 — Polish & hardening

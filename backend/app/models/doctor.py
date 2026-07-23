@@ -37,5 +37,17 @@ class DoctorCreate(DoctorBase):
     user_id: PyObjectId | None = None
 
 
+class DoctorUpdate(BaseModel):
+    """Admin update payload for a team member — every field optional."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    designation: str | None = Field(default=None, min_length=1, max_length=160)
+    qualifications: list[str] | None = None
+    bio: str | None = Field(default=None, max_length=4000)
+    photo_url: str | None = Field(default=None, max_length=2000)
+    availability: Availability | None = None
+    is_active: bool | None = None
+
+
 class DoctorPublic(MongoModel, DoctorBase):
     """Doctor as returned by the public API (no internal user linkage)."""

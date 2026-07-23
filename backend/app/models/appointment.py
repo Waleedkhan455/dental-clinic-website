@@ -40,6 +40,18 @@ class BookingRequest(BaseModel):
     notes: str | None = Field(default=None, max_length=1000)
 
 
+class AppointmentAdminUpdate(BaseModel):
+    """Doctor-panel update — change status, reschedule, or edit notes.
+
+    All optional: send only what changes. Rescheduling (``scheduled_at``) is
+    re-validated against doctor availability and slot clashes server-side.
+    """
+
+    status: AppointmentStatus | None = None
+    scheduled_at: datetime | None = None
+    notes: str | None = Field(default=None, max_length=1000)
+
+
 class AppointmentPublic(MongoModel, AppointmentBase):
     patient_id: PyObjectId | None = None
     status: AppointmentStatus = AppointmentStatus.PENDING
