@@ -59,6 +59,13 @@ uvicorn app.main:app --reload --port 8000
 - Health check: <http://127.0.0.1:8000/health>
 - Interactive docs: <http://127.0.0.1:8000/docs>
 
+Seed initial data (run once, from `backend/`, with the venv active):
+
+```bash
+python -m app.seed         # doctors, services, testimonials
+python -m app.seed_admin   # default doctor/admin account (prints the password)
+```
+
 ### 2. Frontend (Next.js)
 
 ```bash
@@ -86,8 +93,10 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
 
 - [x] **Phase 1 — Project setup:** two services, design system, shared layout,
       UI primitives, typed API client, CORS, health/ping verified.
-- [ ] Phase 2 — Database & models
-- [ ] Phase 3 — Authentication & roles
+- [x] **Phase 2 — Database & models:** Pydantic schemas for all 7 entities,
+      indexes, seed (3 doctors + 15 services + testimonials), public read endpoints.
+- [x] **Phase 3 — Authentication & roles:** JWT + bcrypt, patient register/login,
+      role dependencies, Next.js proxy route guards, doctor/patient panels.
 - [ ] Phase 4 — Public website
 - [ ] Phase 5 — Appointment booking
 - [ ] Phase 6 — Patient panel
