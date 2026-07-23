@@ -142,28 +142,3 @@
   }
 }
 
-/*
- * Hero image banner — seamless, self-running leftward auto-scroll.
- * The track holds two identical copies of the tiles; shifting it by -50%
- * lands copy #2 exactly where copy #1 began, so the loop has no visible seam.
- * The global prefers-reduced-motion rule above pauses this automatically.
- */
-@keyframes hero-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.hero-marquee-track {
-  animation: hero-marquee 45s linear infinite;
-  will-change: transform;
-}
-
-/* Pause while hovered or when a tile inside is focused (keyboard users). */
-.hero-marquee-viewport:hover .hero-marquee-track,
-.hero-marquee-viewport:focus-within .hero-marquee-track {
-  animation-play-state: paused;
-}

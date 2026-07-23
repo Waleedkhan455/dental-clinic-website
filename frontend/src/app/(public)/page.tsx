@@ -8,8 +8,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-import { buttonVariants } from "@/components/ui/Button";
-import { HeroImageMarquee } from "@/components/sections/HeroImageMarquee";
+import { HeroSlider } from "@/components/sections/HeroSlider";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { DoctorCard } from "@/components/sections/DoctorCard";
 import { ServiceCard } from "@/components/sections/ServiceCard";
@@ -52,37 +51,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="overflow-hidden bg-surface-muted">
-        <div className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground">
-              {siteConfig.location.city}, {siteConfig.location.country}
-            </span>
-            <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Comprehensive dental care you can trust
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-              {siteConfig.name} provides expert treatment from clinicians and faculty affiliated
-              with Ayub Medical College — specialising in dental implants, prosthodontics, and
-              orthodontics.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/book" className={buttonVariants({ variant: "primary", size: "lg" })}>
-                <CalendarPlus className="h-5 w-5" aria-hidden="true" />
-                Book an Appointment
-              </Link>
-              <Link href="/services" className={buttonVariants({ variant: "outline", size: "lg" })}>
-                Explore Services
-              </Link>
-            </div>
-          </div>
-        </div>
-        {/* Auto-sliding image banner (full-width). */}
-        <div className="mt-12 pb-16 sm:mt-16 sm:pb-24">
-          <HeroImageMarquee />
-        </div>
-      </section>
+      {/* Hero slideshow */}
+      <HeroSlider />
 
       {/* About the Clinic */}
       <section id="about" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
