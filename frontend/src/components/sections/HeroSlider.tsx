@@ -46,7 +46,7 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const AUTOPLAY_MS = 6000;
+const AUTOPLAY_MS = 5000;
 const PRIMARY_BTN =
   "inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-surface px-7 text-base font-semibold text-primary transition-colors hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 const SECONDARY_BTN =
