@@ -1,0 +1,19 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# MongoDB (async driver + BSON)
+motor==3.6.0
+pymongo==4.9.2
+
+# Validation & settings
+pydantic==2.10.4
+pydantic-settings==2.7.0
+email-validator==2.2.0
+
+# Auth (used from Phase 3 onward)
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
+
+# Form / file uploads
+python-multipart==0.0.20

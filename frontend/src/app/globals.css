@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/*
+ * Zimal Dental Clinic — Design System
+ * -----------------------------------
+ * Brand: blue + white, calm and trustworthy for a healthcare audience.
+ * Rules: FLAT solid colours only. No gradients anywhere (backgrounds,
+ * buttons, overlays, or text). Neutral (slate) greys are supporting tones.
+ * All foreground/background pairs below meet WCAG AA (>= 4.5:1).
+ */
+
+@theme {
+  /* --- Brand blue scale (flat, solid) --- */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbe9fe;
+  --color-brand-200: #bfd7fe;
+  --color-brand-300: #93b8fd;
+  --color-brand-400: #6091fa;
+  --color-brand-500: #3b6df6;
+  --color-brand-600: #2556eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  /* --- Neutral (slate) scale — supporting greys --- */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+
+  /* --- Semantic tokens --- */
+  --color-background: #ffffff; /* dominant white background */
+  --color-surface: #ffffff; /* cards, panels */
+  --color-surface-muted: #f8fafc; /* subtle section backgrounds */
+  --color-foreground: #0f172a; /* primary text */
+  --color-muted-foreground: #475569; /* secondary text */
+  --color-border: #e2e8f0; /* hairlines, dividers */
+  --color-input: #cbd5e1; /* form control borders */
+  --color-ring: #1d4ed8; /* focus ring */
+
+  --color-primary: #1d4ed8; /* brand / primary actions */
+  --color-primary-hover: #1e40af;
+  --color-primary-foreground: #ffffff;
+
+  --color-accent: #eff6ff; /* light blue highlight surface */
+  --color-accent-foreground: #1e3a8a;
+
+  /* Status colours (forms, toasts, appointment states) */
+  --color-success: #15803d;
+  --color-success-foreground: #ffffff;
+  --color-success-surface: #f0fdf4;
+  --color-warning: #b45309;
+  --color-warning-foreground: #ffffff;
+  --color-warning-surface: #fffbeb;
+  --color-destructive: #b91c1c;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-surface: #fef2f2;
+  --color-info: #1d4ed8;
+  --color-info-surface: #eff6ff;
+
+  /* --- Typography --- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-poppins), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Radii --- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  /* --- Shadows (subtle, flat-friendly) --- */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --shadow-elevated: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 2px 6px -2px rgb(15 23 42 / 0.06);
+}
+
+/* Base element styles */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 1rem; /* 16px base */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-foreground);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  /* Visible, accessible focus indicator for keyboard users (never removed). */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Respect users who prefer reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Utility: accessible visually-hidden text (for skip links, labels). */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
