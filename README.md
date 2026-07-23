@@ -97,7 +97,9 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
       indexes, seed (3 doctors + 15 services + testimonials), public read endpoints.
 - [x] **Phase 3 — Authentication & roles:** JWT + bcrypt, patient register/login,
       role dependencies, Next.js proxy route guards, doctor/patient panels.
-- [ ] Phase 4 — Public website
+- [x] **Phase 4 — Public website:** Home (all sections), Services listing + detail,
+      Team, Gallery, Contact — all rendered live from the database.
+- [ ] Phase 5 — Appointment booking
 - [ ] Phase 5 — Appointment booking
 - [ ] Phase 6 — Patient panel
 - [ ] Phase 7 — Doctor / admin panel
