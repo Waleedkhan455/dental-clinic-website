@@ -20,14 +20,15 @@ export const siteConfig = {
     city: "Mansehra",
     country: "Pakistan",
     region: "Khyber Pakhtunkhwa",
-    addressLine: "Mansehra, Khyber Pakhtunkhwa, Pakistan",
+    addressLine: "Siran Arcade, Upper Chanai, Mansehra 21300, Khyber Pakhtunkhwa, Pakistan",
     // Approximate town-centre coordinates for local-business structured data.
     geo: { latitude: 34.333, longitude: 73.2 },
+    // The clinic's Google Maps listing (opens the exact location / directions).
+    mapUrl: "https://maps.app.goo.gl/jt9wiYM6i8WUgCCy6?g_st=iw",
   },
   contact: {
-    // Placeholder values — update with the clinic's real details.
-    phone: "+92 300 0000000",
-    whatsapp: "+92 300 0000000",
+    phone: "+92479132302",
+    whatsapp: "+92479132302",
     email: "info@zimaldental.com",
   },
 } as const;

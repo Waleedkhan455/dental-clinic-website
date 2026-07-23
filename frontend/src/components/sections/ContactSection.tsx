@@ -1,14 +1,16 @@
-import { MapPin, Phone, Mail, MessageCircle, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, Clock, Navigation } from "lucide-react";
 
 import { siteConfig, clinicHours, whatsappLink } from "@/config/site";
 import { buttonVariants } from "@/components/ui/Button";
 
 const telHref = `tel:${siteConfig.contact.phone.replace(/\s/g, "")}`;
+const mapUrl = siteConfig.location.mapUrl;
+// Embed centred on the clinic's own listing (name + address).
 const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(
-  `${siteConfig.location.city}, ${siteConfig.location.country}`,
+  `${siteConfig.name}, ${siteConfig.location.addressLine}`,
 )}&output=embed`;
 
-/** Contact details, opening hours, quick actions, and an embedded map. */
+/** Contact details, opening hours, quick actions, and a map of the clinic. */
 export function ContactSection() {
   return (
     <div className="grid gap-8 lg:grid-cols-2">
@@ -18,7 +20,14 @@ export function ContactSection() {
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             <div>
               <p className="font-medium text-foreground">Location</p>
-              <p className="text-sm text-muted-foreground">{siteConfig.location.addressLine}</p>
+              <a
+                href={mapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-primary hover:underline"
+              >
+                {siteConfig.location.addressLine}
+              </a>
             </div>
           </li>
           <li className="flex items-start gap-3">
@@ -58,7 +67,7 @@ export function ContactSection() {
           </li>
         </ul>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a
             href={whatsappLink(
               siteConfig.contact.whatsapp,
@@ -75,17 +84,37 @@ export function ContactSection() {
             <Phone className="h-4 w-4" aria-hidden="true" />
             Call the clinic
           </a>
+          <a
+            href={mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "md" })}
+          >
+            <Navigation className="h-4 w-4" aria-hidden="true" />
+            Get directions
+          </a>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
-        <iframe
-          title={`Map showing ${siteConfig.name} in ${siteConfig.location.city}`}
-          src={mapSrc}
-          className="h-full min-h-[320px] w-full"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+      <div className="flex flex-col gap-2">
+        <div className="overflow-hidden rounded-lg border border-border">
+          <iframe
+            title={`Map showing ${siteConfig.name} in ${siteConfig.location.city}`}
+            src={mapSrc}
+            className="h-full min-h-[320px] w-full"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+        <a
+          href={mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-primary hover:underline"
+        >
+          <MapPin className="h-4 w-4" aria-hidden="true" />
+          Open in Google Maps
+        </a>
       </div>
     </div>
   );

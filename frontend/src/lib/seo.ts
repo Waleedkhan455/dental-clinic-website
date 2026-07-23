@@ -15,6 +15,7 @@ export function clinicJsonLd() {
     url: siteConfig.url,
     telephone: siteConfig.contact.phone,
     email: siteConfig.contact.email,
+    hasMap: siteConfig.location.mapUrl,
     priceRange: "$$",
     address: {
       "@type": "PostalAddress",

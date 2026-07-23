@@ -47,7 +47,14 @@ export function Footer() {
           <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
             <li className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>{siteConfig.location.addressLine}</span>
+              <a
+                href={siteConfig.location.mapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary"
+              >
+                {siteConfig.location.addressLine}
+              </a>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
