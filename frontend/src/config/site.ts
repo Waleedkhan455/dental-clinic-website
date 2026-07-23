@@ -26,6 +26,22 @@ export const siteConfig = {
   },
 } as const;
 
+/** Logical display order for service categories on the Services page. */
+export const serviceCategoryOrder = [
+  "General Dentistry",
+  "Restorative & Prosthodontics",
+  "Orthodontics",
+  "Cosmetic Dentistry",
+  "Pediatric Dentistry",
+] as const;
+
+/** Clinic opening hours shown on the Contact page. */
+export const clinicHours = [
+  { day: "Monday – Saturday", hours: "10:00 AM – 8:00 PM" },
+  { day: "Friday", hours: "Implant & Prosthodontics clinic (Dr. Safa Nawaz)" },
+  { day: "Sunday", hours: "Closed" },
+] as const;
+
 /** Primary navigation shown in the public header. */
 export const mainNavLinks = [
   { label: "Home", href: "/" },
