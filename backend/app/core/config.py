@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24  # 24 hours
 
+    # --- Default doctor/admin account (created by `python -m app.seed_admin`) -
+    # If admin_password is unset, the seed script generates a strong one and
+    # prints it once.
+    admin_email: str = "doctor@zimaldental.com"
+    admin_name: str = "Zimal Dental Admin"
+    admin_password: str | None = None
+
     @property
     def cors_origin_list(self) -> list[str]:
         """Return CORS origins as a clean list."""

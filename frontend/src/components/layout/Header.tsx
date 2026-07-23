@@ -2,20 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X, CalendarPlus } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, CalendarPlus, LayoutDashboard, LogOut } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { mainNavLinks } from "@/config/site";
+import { useAuth } from "@/lib/auth/AuthContext";
 import { Logo } from "@/components/layout/Logo";
-import { buttonVariants } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const panelHref = user?.role === "doctor" ? "/doctor" : "/patient";
+
+  function handleLogout() {
+    logout();
+    setMobileOpen(false);
+    router.replace("/");
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface">
@@ -41,14 +52,30 @@ export function Header() {
           ))}
         </nav>
 
+        {/* Desktop actions */}
         <div className="hidden items-center gap-2 md:flex">
-          <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            Login
-          </Link>
-          <Link href="/book" className={buttonVariants({ variant: "primary", size: "sm" })}>
-            <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-            Book Appointment
-          </Link>
+          {user ? (
+            <>
+              <Link href={panelHref} className={buttonVariants({ variant: "primary", size: "sm" })}>
+                <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                Dashboard
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Log out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                Login
+              </Link>
+              <Link href="/book" className={buttonVariants({ variant: "primary", size: "sm" })}>
+                <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+                Book Appointment
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -91,21 +118,40 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className={buttonVariants({ variant: "secondary", size: "md" })}
-            >
-              Login
-            </Link>
-            <Link
-              href="/book"
-              onClick={() => setMobileOpen(false)}
-              className={buttonVariants({ variant: "primary", size: "md" })}
-            >
-              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Book Appointment
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href={panelHref}
+                  onClick={() => setMobileOpen(false)}
+                  className={buttonVariants({ variant: "primary", size: "md" })}
+                >
+                  <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                  Dashboard
+                </Link>
+                <Button variant="secondary" size="md" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className={buttonVariants({ variant: "secondary", size: "md" })}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/book"
+                  onClick={() => setMobileOpen(false)}
+                  className={buttonVariants({ variant: "primary", size: "md" })}
+                >
+                  <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+                  Book Appointment
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       )}

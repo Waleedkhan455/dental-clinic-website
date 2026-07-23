@@ -11,6 +11,11 @@ from app.models.doctor import DoctorPublic
 from app.models.gallery import GalleryImagePublic
 from app.models.service import ServicePublic
 from app.models.testimonial import TestimonialPublic
+from app.models.user import UserInDB
+
+
+def users_repo() -> Repository[UserInDB]:
+    return Repository(get_database()[c.USERS], UserInDB)
 
 
 def doctors_repo() -> Repository[DoctorPublic]:

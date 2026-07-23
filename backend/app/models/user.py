@@ -28,3 +28,10 @@ class UserPublic(MongoModel, UserBase):
     """User as returned by the API — never includes the password hash."""
 
     created_at: datetime | None = None
+
+
+class UserInDB(MongoModel, UserBase):
+    """Internal user record including the password hash. Never returned as-is."""
+
+    password_hash: str
+    created_at: datetime | None = None

@@ -55,3 +55,8 @@ class Repository(Generic[ModelT]):
 
     async def count(self, filter: dict[str, Any] | None = None) -> int:
         return await self.collection.count_documents(filter or {})
+
+    async def insert_one(self, data: dict[str, Any]) -> str:
+        """Insert a document and return its new id as a string."""
+        result = await self.collection.insert_one(data)
+        return str(result.inserted_id)

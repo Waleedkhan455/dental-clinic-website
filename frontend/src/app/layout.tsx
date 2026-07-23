@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AuthProvider } from "@/lib/auth/AuthContext";
 import { siteConfig } from "@/config/site";
 
 const inter = Inter({
@@ -47,7 +48,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );
