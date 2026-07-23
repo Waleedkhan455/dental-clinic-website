@@ -99,7 +99,9 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
       role dependencies, Next.js proxy route guards, doctor/patient panels.
 - [x] **Phase 4 — Public website:** Home (all sections), Services listing + detail,
       Team, Gallery, Contact — all rendered live from the database.
-- [ ] Phase 5 — Appointment booking
+- [x] **Phase 5 — Appointment booking:** login-required booking form with doctor
+      selection, availability enforcement, double-booking prevention, `pending` status.
+- [ ] Phase 6 — Patient panel
 - [ ] Phase 5 — Appointment booking
 - [ ] Phase 6 — Patient panel
 - [ ] Phase 7 — Doctor / admin panel
