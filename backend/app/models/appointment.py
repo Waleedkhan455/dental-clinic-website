@@ -7,7 +7,7 @@ books; ``patient_name``/``patient_phone`` capture contact details on the form.
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.common import AppointmentStatus, MongoModel, PyObjectId
 
@@ -23,6 +23,21 @@ class AppointmentBase(BaseModel):
 
 class AppointmentCreate(AppointmentBase):
     pass
+
+
+class BookingRequest(BaseModel):
+    """Payload a logged-in patient submits to book an appointment.
+
+    ``patient_id`` is taken from the authenticated user, and ``status`` is set
+    to ``pending`` server-side — neither can be supplied by the client.
+    """
+
+    patient_name: str = Field(min_length=1, max_length=120)
+    patient_phone: str = Field(min_length=3, max_length=40)
+    doctor_id: PyObjectId
+    service_id: PyObjectId | None = None
+    scheduled_at: datetime
+    notes: str | None = Field(default=None, max_length=1000)
 
 
 class AppointmentPublic(MongoModel, AppointmentBase):

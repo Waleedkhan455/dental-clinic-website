@@ -7,6 +7,7 @@ Each factory resolves the active database at call time.
 from app.db import collections as c
 from app.db.mongodb import get_database
 from app.db.repository import Repository
+from app.models.appointment import AppointmentPublic
 from app.models.doctor import DoctorPublic
 from app.models.gallery import GalleryImagePublic
 from app.models.service import ServicePublic
@@ -16,6 +17,10 @@ from app.models.user import UserInDB
 
 def users_repo() -> Repository[UserInDB]:
     return Repository(get_database()[c.USERS], UserInDB)
+
+
+def appointments_repo() -> Repository[AppointmentPublic]:
+    return Repository(get_database()[c.APPOINTMENTS], AppointmentPublic)
 
 
 def doctors_repo() -> Repository[DoctorPublic]:

@@ -5,6 +5,7 @@ lifecycle, and the API routers. Business logic and database access live behind
 this API — the frontend never talks to MongoDB directly.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -30,15 +31,31 @@ async def lifespan(app: FastAPI):
     developer can inspect ``/health`` and the docs, but database-backed
     endpoints will surface a clear error until MONGO_URI is configured.
     """
-    try:
-        await connect_to_mongo()
-        await ensure_indexes(get_database())
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("MongoDB connection failed at startup: %s", exc)
-        logger.warning(
-            "API is running, but database endpoints will fail until a reachable "
-            "MONGO_URI is configured in backend/.env"
-        )
+    # Retry a few times so a transient DNS/network blip at boot does not leave
+    # the API running without a database for the rest of its lifetime.
+    attempts = 5
+    for attempt in range(1, attempts + 1):
+        try:
+            await connect_to_mongo()
+            await ensure_indexes(get_database())
+            break
+        except Exception as exc:  # noqa: BLE001
+            if attempt < attempts:
+                logger.warning(
+                    "MongoDB connection attempt %d/%d failed: %s; retrying in 2s…",
+                    attempt,
+                    attempts,
+                    exc,
+                )
+                await asyncio.sleep(2)
+            else:
+                logger.error(
+                    "MongoDB connection failed after %d attempts: %s", attempts, exc
+                )
+                logger.error(
+                    "API is running, but database endpoints will fail until a reachable "
+                    "MONGO_URI is configured in backend/.env"
+                )
     yield
     await close_mongo_connection()
 

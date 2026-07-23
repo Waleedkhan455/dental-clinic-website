@@ -55,10 +55,21 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/patient") && payload.role !== "patient") {
     return NextResponse.redirect(new URL("/doctor", request.url));
   }
+  // Booking is a patient action; doctors are sent to their panel.
+  if (pathname.startsWith("/book") && payload.role !== "patient") {
+    return NextResponse.redirect(new URL("/doctor", request.url));
+  }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/doctor", "/doctor/:path*", "/patient", "/patient/:path*"],
+  matcher: [
+    "/doctor",
+    "/doctor/:path*",
+    "/patient",
+    "/patient/:path*",
+    "/book",
+    "/book/:path*",
+  ],
 };
