@@ -5,6 +5,7 @@ uvicorn[standard]==0.34.0
 # MongoDB (async driver + BSON)
 motor==3.6.0
 pymongo==4.9.2
+dnspython==2.7.0  # required for mongodb+srv:// (Atlas) DNS SRV resolution
 
 # Validation & settings
 pydantic==2.10.4
