@@ -45,3 +45,15 @@ class AppointmentPublic(MongoModel, AppointmentBase):
     status: AppointmentStatus = AppointmentStatus.PENDING
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+class AppointmentDetail(AppointmentPublic):
+    """An appointment enriched with the doctor and service display names.
+
+    Used by the patient and doctor panels so the client doesn't have to join
+    ``doctor_id``/``service_id`` against separate lookups.
+    """
+
+    doctor_name: str | None = None
+    doctor_designation: str | None = None
+    service_name: str | None = None

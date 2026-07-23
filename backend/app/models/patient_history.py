@@ -28,3 +28,10 @@ class PatientHistoryCreate(PatientHistoryBase):
 class PatientHistoryPublic(MongoModel, PatientHistoryBase):
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+class PatientHistoryDetail(PatientHistoryPublic):
+    """A treatment record enriched with the treating doctor's display name."""
+
+    doctor_name: str | None = None
+    doctor_designation: str | None = None

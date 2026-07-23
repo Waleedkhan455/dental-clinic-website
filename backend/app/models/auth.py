@@ -22,6 +22,17 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ProfileUpdateRequest(BaseModel):
+    """Fields a signed-in user may edit on their own profile.
+
+    Email and role are intentionally omitted — email is the login identity and
+    role can never be self-assigned.
+    """
+
+    name: str = Field(min_length=1, max_length=120)
+    phone: str | None = Field(default=None, max_length=40)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

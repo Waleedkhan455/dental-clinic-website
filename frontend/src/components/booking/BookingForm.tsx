@@ -195,7 +195,10 @@ function BookingFormFields({ user, token, doctors, services }: FieldsProps) {
             </div>
           </dl>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/patient" className={buttonVariants({ variant: "primary" })}>
+            <Link
+              href="/patient/appointments"
+              className={buttonVariants({ variant: "primary" })}
+            >
               View my appointments
             </Link>
             <Button variant="secondary" onClick={resetForm}>

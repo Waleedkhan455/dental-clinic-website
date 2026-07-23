@@ -60,3 +60,11 @@ class Repository(Generic[ModelT]):
         """Insert a document and return its new id as a string."""
         result = await self.collection.insert_one(data)
         return str(result.inserted_id)
+
+    async def update_by_id(self, id: str, changes: dict[str, Any]) -> bool:
+        """Apply ``$set`` changes to one document by id. Returns True if found."""
+        oid = to_object_id(id)
+        if oid is None:
+            return False
+        result = await self.collection.update_one({"_id": oid}, {"$set": changes})
+        return result.matched_count > 0

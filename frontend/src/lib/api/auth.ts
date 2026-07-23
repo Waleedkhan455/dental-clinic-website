@@ -31,6 +31,11 @@ export interface LoginInput {
   password: string;
 }
 
+export interface ProfileUpdateInput {
+  name: string;
+  phone?: string | null;
+}
+
 export function registerRequest(input: RegisterInput): Promise<TokenResponse> {
   return apiFetch<TokenResponse>("/api/auth/register", { method: "POST", body: input });
 }
@@ -41,4 +46,9 @@ export function loginRequest(input: LoginInput): Promise<TokenResponse> {
 
 export function getMe(token: string): Promise<AuthUser> {
   return apiFetch<AuthUser>("/api/auth/me", { token });
+}
+
+/** Update the signed-in user's own profile (name and phone). */
+export function updateProfile(input: ProfileUpdateInput, token: string): Promise<AuthUser> {
+  return apiFetch<AuthUser>("/api/auth/me", { method: "PATCH", body: input, token });
 }

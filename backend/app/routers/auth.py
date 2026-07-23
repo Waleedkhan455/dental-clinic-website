@@ -4,7 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.security import create_access_token, hash_password, verify_password
 from app.dependencies import get_current_user
-from app.models.auth import LoginRequest, RegisterRequest, TokenResponse
+from app.models.auth import (
+    LoginRequest,
+    ProfileUpdateRequest,
+    RegisterRequest,
+    TokenResponse,
+)
 from app.models.common import UserRole, utcnow
 from app.models.user import UserInDB, UserPublic
 from app.repositories import users_repo
@@ -64,3 +69,23 @@ async def login(body: LoginRequest) -> TokenResponse:
 async def me(current_user: UserInDB = Depends(get_current_user)) -> UserPublic:
     """Return the currently authenticated user."""
     return _to_public(current_user)
+
+
+@router.patch("/me", response_model=UserPublic)
+async def update_me(
+    body: ProfileUpdateRequest,
+    current_user: UserInDB = Depends(get_current_user),
+) -> UserPublic:
+    """Update the signed-in user's own profile (name and phone only).
+
+    A user can only ever edit their own record — the target is taken from the
+    token, never from the request body.
+    """
+    repo = users_repo()
+    await repo.update_by_id(
+        current_user.id,
+        {"name": body.name, "phone": body.phone, "updated_at": utcnow()},
+    )
+    updated = await repo.get(current_user.id)
+    assert updated is not None  # the authenticated user must still exist
+    return _to_public(updated)

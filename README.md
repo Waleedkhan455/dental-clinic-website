@@ -101,8 +101,8 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
       Team, Gallery, Contact — all rendered live from the database.
 - [x] **Phase 5 — Appointment booking:** login-required booking form with doctor
       selection, availability enforcement, double-booking prevention, `pending` status.
-- [ ] Phase 6 — Patient panel
-- [ ] Phase 5 — Appointment booking
-- [ ] Phase 6 — Patient panel
+- [x] **Phase 6 — Patient panel:** dashboard with upcoming appointments, in-panel
+      booking, upcoming/past appointments with cancel, read-only treatment history,
+      profile view/edit — every query scoped to the signed-in patient (data isolation).
 - [ ] Phase 7 — Doctor / admin panel
 - [ ] Phase 8 — Polish & hardening

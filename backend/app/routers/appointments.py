@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.db.repository import to_object_id
 from app.dependencies import require_role
-from app.models.appointment import AppointmentPublic, BookingRequest
+from app.models.appointment import AppointmentDetail, AppointmentPublic, BookingRequest
 from app.models.common import AppointmentStatus, UserRole, utcnow
 from app.models.user import UserInDB
 from app.repositories import appointments_repo, doctors_repo, services_repo
@@ -22,6 +22,83 @@ from app.services.booking import (
 )
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
+
+# Statuses that still occupy a slot and can therefore be cancelled by a patient.
+_CANCELLABLE = {AppointmentStatus.PENDING.value, AppointmentStatus.CONFIRMED.value}
+
+
+async def _enrich(appointments: list[AppointmentPublic]) -> list[AppointmentDetail]:
+    """Attach doctor and service display names to a list of appointments.
+
+    Doctors and services are small collections, so they're loaded once and
+    joined in memory rather than issuing a lookup per appointment.
+    """
+    if not appointments:
+        return []
+
+    doctors = {doc.id: doc for doc in await doctors_repo().list()}
+    services = {svc.id: svc for svc in await services_repo().list()}
+
+    enriched: list[AppointmentDetail] = []
+    for appt in appointments:
+        doctor = doctors.get(appt.doctor_id)
+        service = services.get(appt.service_id) if appt.service_id else None
+        enriched.append(
+            AppointmentDetail(
+                **appt.model_dump(),
+                doctor_name=doctor.name if doctor else None,
+                doctor_designation=doctor.designation if doctor else None,
+                service_name=service.name if service else None,
+            )
+        )
+    return enriched
+
+
+@router.get("/mine", response_model=list[AppointmentDetail])
+async def my_appointments(
+    current_user: UserInDB = Depends(require_role(UserRole.PATIENT)),
+) -> list[AppointmentDetail]:
+    """Every appointment belonging to the signed-in patient, soonest first.
+
+    Scoped to ``patient_id`` from the token, so a patient can only ever see
+    their own appointments — never another patient's.
+    """
+    appointments = await appointments_repo().list(
+        {"patient_id": to_object_id(current_user.id)},
+        sort=[("scheduled_at", 1)],
+    )
+    return await _enrich(appointments)
+
+
+@router.patch("/{appointment_id}/cancel", response_model=AppointmentDetail)
+async def cancel_my_appointment(
+    appointment_id: str,
+    current_user: UserInDB = Depends(require_role(UserRole.PATIENT)),
+) -> AppointmentDetail:
+    """Cancel one of the patient's own pending/confirmed appointments."""
+    repo = appointments_repo()
+    appointment = await repo.get(appointment_id)
+
+    # 404 (not 403) when the appointment isn't the caller's, so ownership of
+    # other patients' appointments can't be probed by id.
+    if appointment is None or appointment.patient_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
+        )
+
+    if appointment.status.value not in _CANCELLABLE:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This appointment can no longer be cancelled.",
+        )
+
+    await repo.update_by_id(
+        appointment_id,
+        {"status": AppointmentStatus.CANCELLED.value, "updated_at": utcnow()},
+    )
+    updated = await repo.get(appointment_id)
+    assert updated is not None  # just updated
+    return (await _enrich([updated]))[0]
 
 
 @router.post("", response_model=AppointmentPublic, status_code=status.HTTP_201_CREATED)

@@ -10,6 +10,7 @@ from app.db.repository import Repository
 from app.models.appointment import AppointmentPublic
 from app.models.doctor import DoctorPublic
 from app.models.gallery import GalleryImagePublic
+from app.models.patient_history import PatientHistoryPublic
 from app.models.service import ServicePublic
 from app.models.testimonial import TestimonialPublic
 from app.models.user import UserInDB
@@ -21,6 +22,10 @@ def users_repo() -> Repository[UserInDB]:
 
 def appointments_repo() -> Repository[AppointmentPublic]:
     return Repository(get_database()[c.APPOINTMENTS], AppointmentPublic)
+
+
+def history_repo() -> Repository[PatientHistoryPublic]:
+    return Repository(get_database()[c.PATIENT_HISTORY], PatientHistoryPublic)
 
 
 def doctors_repo() -> Repository[DoctorPublic]:

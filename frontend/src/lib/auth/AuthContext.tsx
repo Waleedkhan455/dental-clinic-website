@@ -27,6 +27,8 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (input: LoginInput) => Promise<AuthUser>;
   register: (input: RegisterInput) => Promise<AuthUser>;
+  /** Replace the cached user (e.g. after a profile edit). */
+  updateUser: (user: AuthUser) => void;
   logout: () => void;
 }
 
@@ -82,6 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [applyAuth],
   );
 
+  const updateUser = useCallback((next: AuthUser) => {
+    setUser(next);
+  }, []);
+
   const logout = useCallback(() => {
     removeTokenCookie();
     setToken(null);
@@ -89,8 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, token, isLoading, login, register, logout }),
-    [user, token, isLoading, login, register, logout],
+    () => ({ user, token, isLoading, login, register, updateUser, logout }),
+    [user, token, isLoading, login, register, updateUser, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

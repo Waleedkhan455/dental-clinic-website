@@ -8,7 +8,16 @@ aggregate ``api_router`` below is what ``main.py`` mounts under the API prefix.
 
 from fastapi import APIRouter
 
-from app.routers import appointments, auth, doctors, gallery, meta, services, testimonials
+from app.routers import (
+    appointments,
+    auth,
+    doctors,
+    gallery,
+    history,
+    meta,
+    services,
+    testimonials,
+)
 
 api_router = APIRouter()
 api_router.include_router(meta.router)
@@ -18,5 +27,6 @@ api_router.include_router(services.router)
 api_router.include_router(testimonials.router)
 api_router.include_router(gallery.router)
 api_router.include_router(appointments.router)
+api_router.include_router(history.router)
 
 __all__ = ["api_router"]
