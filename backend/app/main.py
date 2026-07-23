@@ -12,7 +12,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.db.mongodb import close_mongo_connection, connect_to_mongo, ping
+from app.db.indexes import ensure_indexes
+from app.db.mongodb import close_mongo_connection, connect_to_mongo, get_database, ping
 from app.routers import api_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
     """
     try:
         await connect_to_mongo()
+        await ensure_indexes(get_database())
     except Exception as exc:  # noqa: BLE001
         logger.warning("MongoDB connection failed at startup: %s", exc)
         logger.warning(
