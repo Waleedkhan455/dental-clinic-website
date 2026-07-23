@@ -34,7 +34,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   function handleLogout() {
     logout();
-    router.replace("/login");
+    // Hard navigation clears the client Router Cache so previously-authenticated
+    // pages can't be shown from cache (e.g. via the Back button) after sign-out.
+    window.location.assign("/login");
   }
 
   return (

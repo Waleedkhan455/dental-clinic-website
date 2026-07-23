@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useToast } from "@/components/ui/Toast";
+import { redirectAfterAuth } from "@/lib/auth/redirect";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,8 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,16 +24,12 @@ export default function LoginPage() {
     setError(null);
     try {
       const user = await login({ email, password });
-      // Prefer an explicit ?next=, otherwise route to the role's panel.
-      const next = new URLSearchParams(window.location.search).get("next");
-      const destination =
-        next && next.startsWith("/") ? next : user.role === "doctor" ? "/doctor" : "/patient";
-      toast({ title: "Welcome back", variant: "success" });
-      router.replace(destination);
+      // Hard-navigate to an explicit ?next= or the role's panel. Keep
+      // `submitting` true — we're leaving the page, not re-enabling the form.
+      redirectAfterAuth(user.role, window.location.search);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Unable to sign in. Please try again.";
       setError(message);
-    } finally {
       setSubmitting(false);
     }
   }

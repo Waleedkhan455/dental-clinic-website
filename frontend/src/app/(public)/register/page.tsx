@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useToast } from "@/components/ui/Toast";
+import { redirectAfterAuth } from "@/lib/auth/redirect";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,8 +12,6 @@ import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/com
 
 export default function RegisterPage() {
   const { register } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
   const [error, setError] = useState<string | null>(null);
@@ -40,18 +37,18 @@ export default function RegisterPage() {
 
     setSubmitting(true);
     try {
-      await register({
+      const user = await register({
         name: form.name,
         email: form.email,
         phone: form.phone || undefined,
         password: form.password,
       });
-      toast({ title: "Account created", variant: "success" });
-      router.replace("/patient");
+      // Hard-navigate to the patient panel (self-registration is always a
+      // patient). Keep `submitting` true — we're leaving the page.
+      redirectAfterAuth(user.role, window.location.search);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Unable to create account. Please try again.";
       setError(message);
-    } finally {
       setSubmitting(false);
     }
   }
