@@ -27,8 +27,10 @@ export const siteConfig = {
     mapUrl: "https://maps.app.goo.gl/jt9wiYM6i8WUgCCy6?g_st=iw",
   },
   contact: {
-    phone: "+92479132302",
-    whatsapp: "+92479132302",
+    // Local: 0347 913 2302 — stored in international form so the tel: link and
+    // WhatsApp (wa.me needs the country code, no leading 0) both work.
+    phone: "+92 347 913 2302",
+    whatsapp: "+92 347 913 2302",
     email: "info@zimaldental.com",
   },
 } as const;
