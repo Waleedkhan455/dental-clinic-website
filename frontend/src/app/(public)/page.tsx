@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   CalendarPlus,
@@ -10,6 +11,7 @@ import {
 
 import { HeroSlider } from "@/components/sections/HeroSlider";
 import { SectionHeading } from "@/components/sections/SectionHeading";
+import { clinicJsonLd } from "@/lib/seo";
 import { DoctorCard } from "@/components/sections/DoctorCard";
 import { ServiceCard } from "@/components/sections/ServiceCard";
 import { TestimonialCard } from "@/components/sections/TestimonialCard";
@@ -17,6 +19,12 @@ import { GalleryGrid } from "@/components/sections/GalleryGrid";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { siteConfig, whatsappLink } from "@/config/site";
 import { getDoctors, getGallery, getServices, getTestimonials } from "@/lib/api/public";
+
+export const metadata: Metadata = {
+  title: "Dental Care in Mansehra",
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+};
 
 // Always render fresh so doctor-panel changes appear immediately.
 export const dynamic = "force-dynamic";
@@ -51,6 +59,12 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Local-business structured data for search engines. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(clinicJsonLd()) }}
+      />
+
       {/* Hero slideshow */}
       <HeroSlider />
 

@@ -109,4 +109,9 @@ Development follows the phased plan in `dental-clinic-website-spec.md`.
       confirm, reschedule, cancel, mark complete); full CRUD for patient history,
       services, team, testimonials, and gallery — all reflected live on the public
       site; every admin endpoint role-guarded on the server.
-- [ ] Phase 8 — Polish & hardening
+- [x] **Phase 8 — Polish & hardening:** server-side field validation on every
+      create/update model; branded 404 + error-boundary pages; accessibility
+      (skip link, landmarks, labelled controls, reduced-motion, focus states);
+      SEO (per-page metadata, canonical/OG/Twitter, `metadataBase`, LocalBusiness
+      JSON-LD for Mansehra, `sitemap.xml`, `robots.txt`); LCP image preload;
+      permission matrix re-verified end-to-end (71 automated checks passing).

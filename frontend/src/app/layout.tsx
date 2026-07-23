@@ -20,12 +20,14 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: `${siteConfig.name} — Dental Care in Mansehra`,
     template: `%s | ${siteConfig.shortName}`,
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
+  alternates: { canonical: "/" },
   keywords: [
     "dentist Mansehra",
     "dental clinic Mansehra",
@@ -37,8 +39,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
     type: "website",
     locale: "en_PK",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

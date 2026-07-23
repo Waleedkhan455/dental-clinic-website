@@ -13,10 +13,16 @@ export const siteConfig = {
   tagline: "Comprehensive dental care in Mansehra",
   description:
     "Comprehensive dental care by experienced clinicians and faculty affiliated with Ayub Medical College — specialising in Dental Implants, Prosthodontics, and Orthodontics.",
+  // Public base URL — set NEXT_PUBLIC_SITE_URL in production for correct
+  // canonical links, Open Graph URLs, sitemap, and robots.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   location: {
     city: "Mansehra",
     country: "Pakistan",
+    region: "Khyber Pakhtunkhwa",
     addressLine: "Mansehra, Khyber Pakhtunkhwa, Pakistan",
+    // Approximate town-centre coordinates for local-business structured data.
+    geo: { latitude: 34.333, longitude: 73.2 },
   },
   contact: {
     // Placeholder values — update with the clinic's real details.

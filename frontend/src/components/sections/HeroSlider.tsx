@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 import Link from "next/link";
 import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -54,6 +55,9 @@ const SECONDARY_BTN =
 const ARROW_BTN =
   "absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md border border-white/50 bg-neutral-900/30 text-white transition-colors hover:bg-neutral-900/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:flex";
 const TEXT_SHADOW = { textShadow: "0 2px 10px rgb(0 0 0 / 0.35)" };
+
+// Preload the first slide's image — it's the hero's LCP element.
+preload(SLIDES[0].image, { as: "image", fetchPriority: "high" });
 
 export function HeroSlider() {
   const [index, setIndex] = useState(0);

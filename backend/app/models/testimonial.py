@@ -6,8 +6,8 @@ from app.models.common import MongoModel
 
 
 class TestimonialBase(BaseModel):
-    patient_name: str
-    message: str
+    patient_name: str = Field(min_length=1, max_length=120)
+    message: str = Field(min_length=1, max_length=2000)
     rating: int = Field(ge=1, le=5)
     is_published: bool = True
 

@@ -19,15 +19,15 @@ class Availability(BaseModel):
     # type == specific_days (e.g. Dr. Safa Nawaz → [4] for Friday).
     weekdays: list[int] = Field(default_factory=list)
     # Human-readable text shown on the site, e.g. "Fridays only".
-    label: str
+    label: str = Field(min_length=1, max_length=120)
 
 
 class DoctorBase(BaseModel):
-    name: str
-    designation: str
+    name: str = Field(min_length=1, max_length=120)
+    designation: str = Field(min_length=1, max_length=160)
     qualifications: list[str] = Field(default_factory=list)
-    bio: str | None = None
-    photo_url: str | None = None
+    bio: str | None = Field(default=None, max_length=4000)
+    photo_url: str | None = Field(default=None, max_length=2000)
     availability: Availability
     is_active: bool = True
 
