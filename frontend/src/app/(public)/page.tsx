@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/Button";
+import { HeroImageMarquee } from "@/components/sections/HeroImageMarquee";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { DoctorCard } from "@/components/sections/DoctorCard";
 import { ServiceCard } from "@/components/sections/ServiceCard";
@@ -52,8 +53,8 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-surface-muted">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <section className="overflow-hidden bg-surface-muted">
+        <div className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
           <div className="max-w-3xl">
             <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground">
               {siteConfig.location.city}, {siteConfig.location.country}
@@ -76,6 +77,10 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
+        </div>
+        {/* Auto-sliding image banner (full-width). */}
+        <div className="mt-12 pb-16 sm:mt-16 sm:pb-24">
+          <HeroImageMarquee />
         </div>
       </section>
 
