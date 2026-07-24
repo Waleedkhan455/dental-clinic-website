@@ -144,3 +144,65 @@ async def send_appointment_confirmation(
 """
 
     return await send_email(to=to_email, subject=subject, text_body=text_body, html_body=html_body)
+
+
+async def send_appointment_cancellation(
+    *,
+    to_email: str,
+    patient_name: str,
+    doctor_name: str | None,
+    service_name: str | None,
+    scheduled_at: datetime,
+) -> bool:
+    """Email the patient that their appointment has been cancelled."""
+    when = _format_when(scheduled_at)
+    dentist = doctor_name or "our dentist"
+    subject = f"Your appointment at {CLINIC_NAME} has been cancelled"
+
+    service_text = f"Service: {service_name}\n" if service_name else ""
+    text_body = (
+        f"Dear {patient_name},\n\n"
+        f"Your dental appointment has been CANCELLED.\n\n"
+        f"When: {when}\n"
+        f"Dentist: {dentist}\n"
+        f"{service_text}\n"
+        f"If you'd like to rebook, please call or WhatsApp us on {CLINIC_PHONE}, "
+        f"or book online any time.\n\n"
+        f"{CLINIC_NAME}\n"
+        f"{CLINIC_ADDRESS}\n"
+    )
+
+    service_row = (
+        f'<tr><td style="padding:4px 0;color:#475569;">Service</td>'
+        f'<td style="padding:4px 0;font-weight:600;color:#0f172a;">{service_name}</td></tr>'
+        if service_name
+        else ""
+    )
+    html_body = f"""\
+<div style="background:#f8fafc;padding:24px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+    <div style="background:#b91c1c;padding:20px 24px;">
+      <h1 style="margin:0;font-size:18px;color:#ffffff;">Appointment cancelled</h1>
+    </div>
+    <div style="padding:24px;">
+      <p style="margin:0 0 16px;">Dear {patient_name},</p>
+      <p style="margin:0 0 20px;color:#475569;">
+        Your dental appointment has been <strong style="color:#b91c1c;">cancelled</strong>.
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:4px 0;color:#475569;width:110px;">When</td>
+            <td style="padding:4px 0;font-weight:600;">{when}</td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Dentist</td>
+            <td style="padding:4px 0;font-weight:600;">{dentist}</td></tr>
+        {service_row}
+      </table>
+      <div style="margin:20px 0;padding:16px;background:#eff6ff;border-radius:8px;font-size:14px;color:#1e3a8a;">
+        Would you like to rebook? Call or WhatsApp us on <strong>{CLINIC_PHONE}</strong>, or book online any time.<br/><br/>
+        <strong>{CLINIC_NAME}</strong><br/>{CLINIC_ADDRESS}
+      </div>
+    </div>
+  </div>
+</div>
+"""
+
+    return await send_email(to=to_email, subject=subject, text_body=text_body, html_body=html_body)

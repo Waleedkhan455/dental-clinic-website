@@ -28,7 +28,10 @@ from app.services.booking import (
     validate_availability,
     validate_not_in_past,
 )
-from app.services.email import send_appointment_confirmation
+from app.services.email import (
+    send_appointment_cancellation,
+    send_appointment_confirmation,
+)
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
@@ -82,6 +85,7 @@ async def my_appointments(
 @router.patch("/{appointment_id}/cancel", response_model=AppointmentDetail)
 async def cancel_my_appointment(
     appointment_id: str,
+    background_tasks: BackgroundTasks,
     current_user: UserInDB = Depends(require_role(UserRole.PATIENT)),
 ) -> AppointmentDetail:
     """Cancel one of the patient's own pending/confirmed appointments."""
@@ -107,7 +111,20 @@ async def cancel_my_appointment(
     )
     updated = await repo.get(appointment_id)
     assert updated is not None  # just updated
-    return (await _enrich([updated]))[0]
+    detail = (await _enrich([updated]))[0]
+
+    # Email the patient a cancellation confirmation (to their account email).
+    if current_user.email:
+        background_tasks.add_task(
+            send_appointment_cancellation,
+            to_email=current_user.email,
+            patient_name=appointment.patient_name or current_user.name,
+            doctor_name=detail.doctor_name,
+            service_name=detail.service_name,
+            scheduled_at=updated.scheduled_at,
+        )
+
+    return detail
 
 
 @router.post("", response_model=AppointmentPublic, status_code=status.HTTP_201_CREATED)
@@ -257,7 +274,7 @@ async def update_appointment(
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
         )
 
-    was_confirmed = appointment.status == AppointmentStatus.CONFIRMED
+    previous_status = appointment.status
 
     changes: dict = {"updated_at": utcnow()}
     if body.status is not None:
@@ -302,14 +319,21 @@ async def update_appointment(
     assert updated is not None
     detail = (await _enrich([updated]))[0]
 
-    # Notify the patient by email when the appointment becomes confirmed.
-    if body.status == AppointmentStatus.CONFIRMED and not was_confirmed:
+    # Notify the patient by email when the appointment transitions to a new
+    # status: confirmed → confirmation email, cancelled → cancellation email.
+    notifier = None
+    if body.status == AppointmentStatus.CONFIRMED and previous_status != AppointmentStatus.CONFIRMED:
+        notifier = send_appointment_confirmation
+    elif body.status == AppointmentStatus.CANCELLED and previous_status != AppointmentStatus.CANCELLED:
+        notifier = send_appointment_cancellation
+
+    if notifier is not None:
         patient = (
             await users_repo().get(appointment.patient_id) if appointment.patient_id else None
         )
         if patient is not None and patient.email:
             background_tasks.add_task(
-                send_appointment_confirmation,
+                notifier,
                 to_email=patient.email,
                 patient_name=appointment.patient_name or patient.name,
                 doctor_name=detail.doctor_name,
