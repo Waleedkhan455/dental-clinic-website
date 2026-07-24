@@ -146,6 +146,86 @@ async def send_appointment_confirmation(
     return await send_email(to=to_email, subject=subject, text_body=text_body, html_body=html_body)
 
 
+async def send_appointment_reschedule(
+    *,
+    to_email: str,
+    patient_name: str,
+    doctor_name: str | None,
+    service_name: str | None,
+    old_scheduled_at: datetime | None,
+    new_scheduled_at: datetime,
+    confirmed: bool = True,
+) -> bool:
+    """Email the patient that the clinic moved their appointment to a new time."""
+    new_when = _format_when(new_scheduled_at)
+    old_when = _format_when(old_scheduled_at) if old_scheduled_at else None
+    dentist = doctor_name or "our dentist"
+    subject = f"Your appointment at {CLINIC_NAME} has been rescheduled"
+
+    status_line = (
+        "Your appointment is confirmed for the new time shown below."
+        if confirmed
+        else "Please note the new time shown below."
+    )
+    service_text = f"Service: {service_name}\n" if service_name else ""
+    old_text = f"Previous time: {old_when}\n" if old_when else ""
+    text_body = (
+        f"Dear {patient_name},\n\n"
+        f"The clinic has RESCHEDULED your dental appointment. {status_line}\n\n"
+        f"New time: {new_when}\n"
+        f"{old_text}"
+        f"Dentist: {dentist}\n"
+        f"{service_text}"
+        f"Clinic: {CLINIC_NAME}\n"
+        f"Address: {CLINIC_ADDRESS}\n"
+        f"Phone / WhatsApp: {CLINIC_PHONE}\n\n"
+        f"If the new time doesn't suit you, please call or WhatsApp us on {CLINIC_PHONE}.\n\n"
+        f"{CLINIC_NAME}\n"
+    )
+
+    old_row = (
+        f'<tr><td style="padding:4px 0;color:#475569;">Previous</td>'
+        f'<td style="padding:4px 0;color:#94a3b8;text-decoration:line-through;">{old_when}</td></tr>'
+        if old_when
+        else ""
+    )
+    service_row = (
+        f'<tr><td style="padding:4px 0;color:#475569;">Service</td>'
+        f'<td style="padding:4px 0;font-weight:600;color:#0f172a;">{service_name}</td></tr>'
+        if service_name
+        else ""
+    )
+    html_body = f"""\
+<div style="background:#f8fafc;padding:24px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+    <div style="background:#b45309;padding:20px 24px;">
+      <h1 style="margin:0;font-size:18px;color:#ffffff;">Appointment rescheduled</h1>
+    </div>
+    <div style="padding:24px;">
+      <p style="margin:0 0 16px;">Dear {patient_name},</p>
+      <p style="margin:0 0 20px;color:#475569;">
+        The clinic has <strong style="color:#b45309;">rescheduled</strong> your appointment. {status_line}
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:4px 0;color:#475569;width:110px;">New time</td>
+            <td style="padding:4px 0;font-weight:700;color:#0f172a;">{new_when}</td></tr>
+        {old_row}
+        <tr><td style="padding:4px 0;color:#475569;">Dentist</td>
+            <td style="padding:4px 0;font-weight:600;">{dentist}</td></tr>
+        {service_row}
+      </table>
+      <div style="margin:20px 0;padding:16px;background:#eff6ff;border-radius:8px;font-size:14px;color:#1e3a8a;">
+        If the new time doesn't suit you, call or WhatsApp us on <strong>{CLINIC_PHONE}</strong>.<br/><br/>
+        <strong>{CLINIC_NAME}</strong><br/>{CLINIC_ADDRESS}
+      </div>
+    </div>
+  </div>
+</div>
+"""
+
+    return await send_email(to=to_email, subject=subject, text_body=text_body, html_body=html_body)
+
+
 async def send_appointment_cancellation(
     *,
     to_email: str,

@@ -31,6 +31,7 @@ from app.services.booking import (
 from app.services.email import (
     send_appointment_cancellation,
     send_appointment_confirmation,
+    send_appointment_reschedule,
 )
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
@@ -275,6 +276,8 @@ async def update_appointment(
         )
 
     previous_status = appointment.status
+    previous_scheduled_at = appointment.scheduled_at  # stored (naive) UTC
+    time_changed = False
 
     changes: dict = {"updated_at": utcnow()}
     if body.status is not None:
@@ -312,30 +315,58 @@ async def update_appointment(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="That time slot is already booked with this doctor.",
             )
-        changes["scheduled_at"] = scheduled_utc
+        # Only treat it as a reschedule if the time actually moved.
+        if scheduled_utc.replace(tzinfo=None) != previous_scheduled_at.replace(tzinfo=None):
+            time_changed = True
+            changes["scheduled_at"] = scheduled_utc
+            changes["previous_scheduled_at"] = previous_scheduled_at
 
     await repo.update_by_id(appointment_id, changes)
     updated = await repo.get(appointment_id)
     assert updated is not None
     detail = (await _enrich([updated]))[0]
 
-    # Notify the patient by email when the appointment transitions to a new
-    # status: confirmed → confirmation email, cancelled → cancellation email.
-    notifier = None
-    if body.status == AppointmentStatus.CONFIRMED and previous_status != AppointmentStatus.CONFIRMED:
-        notifier = send_appointment_confirmation
-    elif body.status == AppointmentStatus.CANCELLED and previous_status != AppointmentStatus.CANCELLED:
-        notifier = send_appointment_cancellation
+    # Notify the patient by email about the change (background task, so a slow or
+    # failing mail server never delays/fails the doctor's action). A reschedule
+    # takes precedence so only one email goes out per action.
+    patient = (
+        await users_repo().get(appointment.patient_id) if appointment.patient_id else None
+    )
+    patient_email = patient.email if patient else None
+    patient_display = appointment.patient_name or (patient.name if patient else "")
 
-    if notifier is not None:
-        patient = (
-            await users_repo().get(appointment.patient_id) if appointment.patient_id else None
-        )
-        if patient is not None and patient.email:
+    if patient_email:
+        if time_changed:
             background_tasks.add_task(
-                notifier,
-                to_email=patient.email,
-                patient_name=appointment.patient_name or patient.name,
+                send_appointment_reschedule,
+                to_email=patient_email,
+                patient_name=patient_display,
+                doctor_name=detail.doctor_name,
+                service_name=detail.service_name,
+                old_scheduled_at=previous_scheduled_at,
+                new_scheduled_at=updated.scheduled_at,
+                confirmed=updated.status == AppointmentStatus.CONFIRMED,
+            )
+        elif (
+            body.status == AppointmentStatus.CONFIRMED
+            and previous_status != AppointmentStatus.CONFIRMED
+        ):
+            background_tasks.add_task(
+                send_appointment_confirmation,
+                to_email=patient_email,
+                patient_name=patient_display,
+                doctor_name=detail.doctor_name,
+                service_name=detail.service_name,
+                scheduled_at=updated.scheduled_at,
+            )
+        elif (
+            body.status == AppointmentStatus.CANCELLED
+            and previous_status != AppointmentStatus.CANCELLED
+        ):
+            background_tasks.add_task(
+                send_appointment_cancellation,
+                to_email=patient_email,
+                patient_name=patient_display,
                 doctor_name=detail.doctor_name,
                 service_name=detail.service_name,
                 scheduled_at=updated.scheduled_at,

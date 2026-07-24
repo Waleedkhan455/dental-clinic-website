@@ -12,6 +12,8 @@ export interface Appointment {
   doctor_id: string;
   service_id?: string | null;
   scheduled_at: string;
+  /** Set when the clinic rescheduled — the prior time. */
+  previous_scheduled_at?: string | null;
   status: AppointmentStatus;
   notes?: string | null;
   created_at?: string | null;

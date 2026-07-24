@@ -192,7 +192,11 @@ export function AppointmentsAdmin() {
           appointment={rescheduleFor}
           busy={actingId === rescheduleFor.id}
           onClose={() => setRescheduleFor(null)}
-          onSubmit={(scheduled_at) => act(rescheduleFor, { scheduled_at }, "Appointment rescheduled")}
+          onSubmit={(scheduled_at) =>
+            // Rescheduling also confirms the appointment at the new time; the
+            // patient is emailed the new time.
+            act(rescheduleFor, { scheduled_at, status: "confirmed" }, "Rescheduled & confirmed")
+          }
         />
       )}
 

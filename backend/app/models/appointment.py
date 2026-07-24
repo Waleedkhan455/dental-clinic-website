@@ -55,6 +55,9 @@ class AppointmentAdminUpdate(BaseModel):
 class AppointmentPublic(MongoModel, AppointmentBase):
     patient_id: PyObjectId | None = None
     status: AppointmentStatus = AppointmentStatus.PENDING
+    # Set when the clinic reschedules — holds the prior time so the patient can
+    # see what changed. Absent/None means the appointment was never rescheduled.
+    previous_scheduled_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
