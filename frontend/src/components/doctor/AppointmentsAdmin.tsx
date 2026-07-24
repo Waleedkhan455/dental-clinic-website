@@ -24,7 +24,7 @@ import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { formatDateTime } from "@/lib/format";
+import { clinicDateTimeParts, formatDateTime } from "@/lib/format";
 
 interface PageData {
   appointments: AppointmentDetail[];
@@ -47,15 +47,6 @@ const STATUS_OPTIONS = [
   { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
 ];
-
-function localParts(iso: string): { date: string; time: string } {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return {
-    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
-  };
-}
 
 export function AppointmentsAdmin() {
   const { token } = useAuth();
@@ -83,7 +74,7 @@ export function AppointmentsAdmin() {
     return list.filter((a) => {
       if (statusFilter && a.status !== statusFilter) return false;
       if (doctorFilter && a.doctor_id !== doctorFilter) return false;
-      if (dayFilter && localParts(a.scheduled_at).date !== dayFilter) return false;
+      if (dayFilter && clinicDateTimeParts(a.scheduled_at).date !== dayFilter) return false;
       return true;
     });
   }, [data?.appointments, statusFilter, doctorFilter, dayFilter]);
@@ -233,7 +224,7 @@ function RescheduleModal({
   onClose: () => void;
   onSubmit: (scheduledAt: string) => void;
 }) {
-  const initial = localParts(appointment.scheduled_at);
+  const initial = clinicDateTimeParts(appointment.scheduled_at);
   const [date, setDate] = useState(initial.date);
   const [time, setTime] = useState(initial.time);
 

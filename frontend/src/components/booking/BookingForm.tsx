@@ -14,6 +14,7 @@ import { Select, type SelectOption } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { formatDateTime } from "@/lib/format";
 
 const WEEKDAY_LABELS = [
   "Monday",
@@ -132,7 +133,7 @@ function BookingFormFields({ user, token, doctors, services }: FieldsProps) {
 
     setSubmitting(true);
     try {
-      await createAppointment(
+      const created = await createAppointment(
         {
           patient_name: name,
           patient_phone: phone,
@@ -143,15 +144,10 @@ function BookingFormFields({ user, token, doctors, services }: FieldsProps) {
         },
         token,
       );
-      const when = new Date(scheduledAt).toLocaleString("en-GB", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
+      setConfirmation({
+        doctorName: selectedDoctor?.name ?? "your dentist",
+        when: formatDateTime(created.scheduled_at),
       });
-      setConfirmation({ doctorName: selectedDoctor?.name ?? "your dentist", when });
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "Could not book the appointment. Please try again.",
