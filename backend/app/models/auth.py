@@ -31,6 +31,7 @@ class ProfileUpdateRequest(BaseModel):
 
     name: str = Field(min_length=1, max_length=120)
     phone: str | None = Field(default=None, max_length=40)
+    avatar_url: str | None = Field(default=None, max_length=2000)
 
 
 class TokenResponse(BaseModel):

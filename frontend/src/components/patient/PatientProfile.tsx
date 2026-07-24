@@ -10,6 +10,7 @@ import { updateProfile } from "@/lib/api/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { PanelLoading } from "@/components/patient/PanelStates";
 
 export function PatientProfile() {
@@ -18,12 +19,16 @@ export function PatientProfile() {
 
   const [name, setName] = useState(user?.name ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url ?? "");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   if (!user || !token) return <PanelLoading />;
 
-  const dirty = name.trim() !== user.name || (phone.trim() || "") !== (user.phone ?? "");
+  const dirty =
+    name.trim() !== user.name ||
+    (phone.trim() || "") !== (user.phone ?? "") ||
+    (avatarUrl || "") !== (user.avatar_url ?? "");
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -37,7 +42,7 @@ export function PatientProfile() {
     setSubmitting(true);
     try {
       const updated = await updateProfile(
-        { name: name.trim(), phone: phone.trim() || null },
+        { name: name.trim(), phone: phone.trim() || null, avatar_url: avatarUrl || null },
         token!,
       );
       updateUser(updated);
@@ -72,6 +77,14 @@ export function PatientProfile() {
                 {error}
               </p>
             )}
+
+            <ImageUpload
+              label="Profile photo"
+              shape="circle"
+              value={avatarUrl}
+              onChange={(url) => setAvatarUrl(url ?? "")}
+              helperText="Optional — upload a photo from your device."
+            />
 
             <Input
               label="Full name"

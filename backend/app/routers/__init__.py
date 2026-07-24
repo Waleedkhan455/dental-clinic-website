@@ -18,6 +18,7 @@ from app.routers import (
     patients,
     services,
     testimonials,
+    uploads,
 )
 
 api_router = APIRouter()
@@ -30,5 +31,6 @@ api_router.include_router(gallery.router)
 api_router.include_router(appointments.router)
 api_router.include_router(history.router)
 api_router.include_router(patients.router)
+api_router.include_router(uploads.router)
 
 __all__ = ["api_router"]

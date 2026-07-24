@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Modal } from "@/components/ui/Modal";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 
 const CATEGORY_OPTIONS = serviceCategoryOrder.map((c) => ({ value: c, label: c }));
@@ -215,7 +216,12 @@ function ServiceFormModal({
         <Select label="Category" options={CATEGORY_OPTIONS} value={category} onChange={(e) => setCategory(e.target.value)} />
         <Textarea label="Description" required value={description} onChange={(e) => setDescription(e.target.value)} />
         <Input label="Number of visits" required value={visits} onChange={(e) => setVisits(e.target.value)} placeholder="e.g. 1–3, depending on case" />
-        <Input label="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" helperText="Optional." />
+        <ImageUpload
+          label="Service image"
+          value={imageUrl}
+          onChange={(url) => setImageUrl(url ?? "")}
+          helperText="Optional — shown on the service's detail page."
+        />
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 rounded border-input" />
           Visible on the public site

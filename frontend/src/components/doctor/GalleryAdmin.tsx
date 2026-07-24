@@ -23,6 +23,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 export function GalleryAdmin() {
   const { token } = useAuth();
@@ -133,7 +134,7 @@ function GalleryFormModal({
 
   function submit() {
     if (!imageUrl.trim()) {
-      setError("An image URL is required.");
+      setError("Please upload an image.");
       return;
     }
     onSubmit({ image_url: imageUrl.trim(), caption: caption.trim() || null, sort_order: Number(sortOrder) || 0 });
@@ -153,7 +154,12 @@ function GalleryFormModal({
     >
       <div className="flex flex-col gap-4">
         {error && <p role="alert" className="rounded-md border border-destructive bg-destructive-surface px-3 py-2 text-sm text-foreground">{error}</p>}
-        <Input label="Image URL" required value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" />
+        <ImageUpload
+          label="Image"
+          value={imageUrl}
+          onChange={(url) => setImageUrl(url ?? "")}
+          helperText="Upload a clinic photo (JPG/PNG, under 5 MB)."
+        />
         <Input label="Caption" value={caption} onChange={(e) => setCaption(e.target.value)} helperText="Optional." />
         <Input label="Sort order" type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} helperText="Lower shows first." />
       </div>

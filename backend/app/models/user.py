@@ -16,6 +16,7 @@ class UserBase(BaseModel):
     name: str
     email: EmailStr
     phone: str | None = None
+    avatar_url: str | None = None
     role: UserRole = UserRole.PATIENT
 
 

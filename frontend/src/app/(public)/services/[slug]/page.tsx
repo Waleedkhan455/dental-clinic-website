@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, CalendarPlus } from "lucide-react";
 
 import { getServiceBySlug } from "@/lib/api/public";
+import { serviceImage } from "@/lib/serviceImage";
 import { buttonVariants } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 
@@ -49,6 +50,15 @@ export default async function ServiceDetailPage({ params }: ServiceDetailProps) 
         {service.category}
       </p>
       <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{service.name}</h1>
+
+      {/* Relevant image (uploaded, or a category default). Background image over a
+          solid fallback so a missing photo degrades gracefully. */}
+      <div
+        className="mt-6 aspect-[16/9] w-full rounded-xl border border-border bg-accent bg-cover bg-center"
+        style={{ backgroundImage: `url(${serviceImage(service)})` }}
+        role="img"
+        aria-label={service.name}
+      />
 
       <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{service.description}</p>
 

@@ -8,9 +8,11 @@ this API — the frontend never talks to MongoDB directly.
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import get_settings
 from app.db.indexes import ensure_indexes
@@ -77,6 +79,11 @@ app.add_middleware(
 
 # All domain endpoints are mounted under the configured API prefix (default /api).
 app.include_router(api_router, prefix=settings.api_prefix)
+
+# Serve uploaded images (team photos, service/gallery images, patient avatars).
+_upload_dir = Path("uploads")
+_upload_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(_upload_dir)), name="uploads")
 
 
 @app.get("/health", tags=["health"])

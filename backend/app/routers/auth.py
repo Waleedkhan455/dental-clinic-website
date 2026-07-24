@@ -84,7 +84,12 @@ async def update_me(
     repo = users_repo()
     await repo.update_by_id(
         current_user.id,
-        {"name": body.name, "phone": body.phone, "updated_at": utcnow()},
+        {
+            "name": body.name,
+            "phone": body.phone,
+            "avatar_url": body.avatar_url,
+            "updated_at": utcnow(),
+        },
     )
     updated = await repo.get(current_user.id)
     assert updated is not None  # the authenticated user must still exist

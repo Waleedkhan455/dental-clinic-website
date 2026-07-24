@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Modal } from "@/components/ui/Modal";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]; // index = Python weekday()
@@ -209,7 +210,12 @@ function DoctorFormModal({
         <Input label="Designation" required value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="e.g. Implantologist & Prosthodontist" />
         <Input label="Qualifications" value={quals} onChange={(e) => setQuals(e.target.value)} placeholder="BDS, FCPS" helperText="Comma-separated." />
         <Textarea label="Bio" value={bio} onChange={(e) => setBio(e.target.value)} />
-        <Input label="Photo URL" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="https://…" helperText="Optional." />
+        <ImageUpload
+          label="Photo"
+          value={photoUrl}
+          onChange={(url) => setPhotoUrl(url ?? "")}
+          helperText="Optional — upload a headshot (JPG/PNG, under 5 MB)."
+        />
         <Select label="Availability type" options={TYPE_OPTIONS} value={type} onChange={(e) => setType(e.target.value as AvailabilityType)} />
         {type === "specific_days" && (
           <div className="flex flex-col gap-1.5">

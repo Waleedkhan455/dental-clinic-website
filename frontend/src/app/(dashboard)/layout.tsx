@@ -49,6 +49,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <p className="text-sm font-medium text-foreground">{user.name}</p>
               <p className="text-xs capitalize text-muted-foreground">{user.role}</p>
             </div>
+            {user.avatar_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatar_url}
+                alt=""
+                className="h-9 w-9 rounded-full border border-border object-cover"
+              />
+            )}
             <Button variant="secondary" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4" aria-hidden="true" />
               Log out

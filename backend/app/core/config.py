@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     app_name: str = "Zimal Dental Clinic API"
     environment: str = "development"
     api_prefix: str = "/api"
+    # Public base URL of THIS API, used to build absolute URLs for uploaded
+    # images so the frontend (a different origin) can load them.
+    public_api_url: str = "http://127.0.0.1:8000"
 
     # --- Database ------------------------------------------------------------
     # The connection string is read from the environment. It is never committed.
