@@ -53,7 +53,9 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
           })}
         </ul>
       </nav>
-      <div>{children}</div>
+      {/* min-w-0 lets wide tables scroll inside their own overflow container
+          instead of pushing the panel past the viewport. */}
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }

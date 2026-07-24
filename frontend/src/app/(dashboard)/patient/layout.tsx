@@ -43,7 +43,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           })}
         </ul>
       </nav>
-      <div>{children}</div>
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }
