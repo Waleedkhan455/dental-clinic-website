@@ -118,7 +118,7 @@ export function ServicesAdmin() {
                 <TableRow key={s.id}>
                   <TableCell className="font-medium text-foreground">{s.name}</TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">{s.category}</TableCell>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">{s.visits_text}</TableCell>
+                  <TableCell className="min-w-[14rem] text-muted-foreground">{s.visits_text}</TableCell>
                   <TableCell>
                     {s.is_active ? <Badge tone="success">Active</Badge> : <Badge tone="neutral">Hidden</Badge>}
                   </TableCell>

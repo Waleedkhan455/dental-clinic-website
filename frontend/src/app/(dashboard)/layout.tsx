@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col bg-surface-muted">
       <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Logo />
           <div className="flex items-center gap-4">
             <div className="hidden text-right sm:block">
@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">{children}</main>
     </div>
   );
 }
