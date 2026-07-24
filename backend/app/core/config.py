@@ -44,10 +44,33 @@ class Settings(BaseSettings):
     admin_name: str = "Zimal Dental Admin"
     admin_password: str | None = None
 
+    # --- Email (SMTP) — patient appointment-confirmation emails --------------
+    # Leave SMTP_HOST/USER/PASSWORD unset to disable sending (the app logs the
+    # email instead of sending it — nothing breaks). Set all three to enable.
+    # Port 587 → STARTTLS (default). Port 465 → set SMTP_SSL=true.
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_ssl: bool = False
+    smtp_starttls: bool = True
+    smtp_from_email: str | None = None  # defaults to smtp_user
+    smtp_from_name: str = "Zimal Dental Clinic"
+
     @property
     def cors_origin_list(self) -> list[str]:
         """Return CORS origins as a clean list."""
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def emails_enabled(self) -> bool:
+        """True only when SMTP is fully configured."""
+        return bool(self.smtp_host and self.smtp_user and self.smtp_password)
+
+    @property
+    def email_from(self) -> str:
+        """The From address for outgoing mail."""
+        return self.smtp_from_email or self.smtp_user or "no-reply@zimaldental.com"
 
 
 @lru_cache

@@ -8,7 +8,7 @@ approves it from the panel.
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from app.db.repository import to_object_id
 from app.dependencies import require_role
@@ -20,7 +20,7 @@ from app.models.appointment import (
 )
 from app.models.common import AppointmentStatus, UserRole, utcnow
 from app.models.user import UserInDB
-from app.repositories import appointments_repo, doctors_repo, services_repo
+from app.repositories import appointments_repo, doctors_repo, services_repo, users_repo
 from app.services.booking import (
     CLINIC_TZ,
     BookingError,
@@ -28,6 +28,7 @@ from app.services.booking import (
     validate_availability,
     validate_not_in_past,
 )
+from app.services.email import send_appointment_confirmation
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
@@ -240,15 +241,23 @@ async def appointment_stats(
 async def update_appointment(
     appointment_id: str,
     body: AppointmentAdminUpdate,
+    background_tasks: BackgroundTasks,
     _: UserInDB = Depends(require_role(UserRole.DOCTOR)),
 ) -> AppointmentDetail:
-    """Confirm/complete/cancel or reschedule an appointment (doctor/admin)."""
+    """Confirm/complete/cancel or reschedule an appointment (doctor/admin).
+
+    When the status becomes ``confirmed`` (and wasn't already), the patient is
+    emailed a confirmation. The email is sent as a background task, so a slow or
+    failing mail server never delays or fails the doctor's action.
+    """
     repo = appointments_repo()
     appointment = await repo.get(appointment_id)
     if appointment is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
         )
+
+    was_confirmed = appointment.status == AppointmentStatus.CONFIRMED
 
     changes: dict = {"updated_at": utcnow()}
     if body.status is not None:
@@ -291,4 +300,21 @@ async def update_appointment(
     await repo.update_by_id(appointment_id, changes)
     updated = await repo.get(appointment_id)
     assert updated is not None
-    return (await _enrich([updated]))[0]
+    detail = (await _enrich([updated]))[0]
+
+    # Notify the patient by email when the appointment becomes confirmed.
+    if body.status == AppointmentStatus.CONFIRMED and not was_confirmed:
+        patient = (
+            await users_repo().get(appointment.patient_id) if appointment.patient_id else None
+        )
+        if patient is not None and patient.email:
+            background_tasks.add_task(
+                send_appointment_confirmation,
+                to_email=patient.email,
+                patient_name=appointment.patient_name or patient.name,
+                doctor_name=detail.doctor_name,
+                service_name=detail.service_name,
+                scheduled_at=updated.scheduled_at,
+            )
+
+    return detail
