@@ -1,54 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { MailCheck } from "lucide-react";
 
 import { useAuth } from "@/lib/auth/AuthContext";
 import { redirectAfterAuth } from "@/lib/auth/redirect";
+import { requestOtp } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/Card";
 
+const RESEND_SECONDS = 30;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterPage() {
   const { register } = useAuth();
 
+  const [step, setStep] = useState<"details" | "verify">("details");
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [sending, setSending] = useState(false); // requesting/resending the code
+  const [submitting, setSubmitting] = useState(false); // creating the account
+  const [resendIn, setResendIn] = useState(0);
+
+  // Countdown for the "resend code" cooldown.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const id = window.setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => window.clearTimeout(id);
+  }, [resendIn]);
 
   function update(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function sendCode(): Promise<boolean> {
+    setSending(true);
+    try {
+      await requestOtp(form.email.trim());
+      setResendIn(RESEND_SECONDS);
+      return true;
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't send the code. Please try again.");
+      return false;
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handleDetails(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
 
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-    if (form.password !== form.confirm) {
-      setError("Passwords do not match.");
-      return;
-    }
+    if (!form.name.trim()) return setError("Please enter your name.");
+    if (!EMAIL_RE.test(form.email.trim())) return setError("Please enter a valid email address.");
+    if (form.password.length < 8) return setError("Password must be at least 8 characters.");
+    if (form.password !== form.confirm) return setError("Passwords do not match.");
+
+    if (await sendCode()) setStep("verify");
+  }
+
+  async function handleVerify(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    if (otp.trim().length < 4) return setError("Enter the code from your email.");
 
     setSubmitting(true);
     try {
       const user = await register({
-        name: form.name,
-        email: form.email,
-        phone: form.phone || undefined,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
         password: form.password,
+        otp: otp.trim(),
       });
-      // Hard-navigate to the patient panel (self-registration is always a
-      // patient). Keep `submitting` true — we're leaving the page.
       redirectAfterAuth(user.role, window.location.search);
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "Unable to create account. Please try again.";
-      setError(message);
+      setError(err instanceof ApiError ? err.message : "Unable to create account. Please try again.");
       setSubmitting(false);
     }
   }
@@ -57,57 +89,108 @@ export default function RegisterPage() {
     <div className="mx-auto flex max-w-md flex-col px-4 py-16 sm:px-6">
       <Card>
         <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>Book appointments and view your visit history.</CardDescription>
+          <CardTitle>{step === "details" ? "Create your account" : "Verify your email"}</CardTitle>
+          <CardDescription>
+            {step === "details"
+              ? "Book appointments and view your visit history."
+              : `Enter the 6-digit code we sent to ${form.email}.`}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-            {error && (
-              <p
-                role="alert"
-                className="rounded-md border border-destructive bg-destructive-surface px-3 py-2 text-sm text-foreground"
-              >
-                {error}
-              </p>
-            )}
-            <Input label="Full name" required value={form.name} onChange={update("name")} autoComplete="name" />
-            <Input
-              label="Email"
-              type="email"
-              required
-              value={form.email}
-              onChange={update("email")}
-              autoComplete="email"
-            />
-            <Input
-              label="Phone"
-              type="tel"
-              value={form.phone}
-              onChange={update("phone")}
-              autoComplete="tel"
-              helperText="Optional — used for appointment updates."
-            />
-            <Input
-              label="Password"
-              type="password"
-              required
-              value={form.password}
-              onChange={update("password")}
-              autoComplete="new-password"
-              helperText="At least 8 characters."
-            />
-            <Input
-              label="Confirm password"
-              type="password"
-              required
-              value={form.confirm}
-              onChange={update("confirm")}
-              autoComplete="new-password"
-            />
-            <Button type="submit" size="lg" isLoading={submitting} className="w-full">
-              Create account
-            </Button>
-          </form>
+          {error && (
+            <p
+              role="alert"
+              className="mb-4 rounded-md border border-destructive bg-destructive-surface px-3 py-2 text-sm text-foreground"
+            >
+              {error}
+            </p>
+          )}
+
+          {step === "details" ? (
+            <form onSubmit={handleDetails} className="flex flex-col gap-4" noValidate>
+              <Input label="Full name" required value={form.name} onChange={update("name")} autoComplete="name" />
+              <Input
+                label="Email"
+                type="email"
+                required
+                value={form.email}
+                onChange={update("email")}
+                autoComplete="email"
+                helperText="We'll send a verification code to this address."
+              />
+              <Input
+                label="Phone"
+                type="tel"
+                value={form.phone}
+                onChange={update("phone")}
+                autoComplete="tel"
+                helperText="Optional — used for appointment updates."
+              />
+              <Input
+                label="Password"
+                type="password"
+                required
+                value={form.password}
+                onChange={update("password")}
+                autoComplete="new-password"
+                helperText="At least 8 characters."
+              />
+              <Input
+                label="Confirm password"
+                type="password"
+                required
+                value={form.confirm}
+                onChange={update("confirm")}
+                autoComplete="new-password"
+              />
+              <Button type="submit" size="lg" isLoading={sending} className="w-full">
+                <MailCheck className="h-5 w-5" aria-hidden="true" />
+                Send verification code
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerify} className="flex flex-col gap-4" noValidate>
+              <Input
+                label="Verification code"
+                required
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="6-digit code"
+                className="text-center text-lg tracking-[0.4em]"
+              />
+              <Button type="submit" size="lg" isLoading={submitting} className="w-full">
+                Create account
+              </Button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("details");
+                    setOtp("");
+                    setError(null);
+                  }}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Use a different email
+                </button>
+                <button
+                  type="button"
+                  disabled={sending || resendIn > 0}
+                  onClick={() => {
+                    setError(null);
+                    void sendCode();
+                  }}
+                  className="font-medium text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
+                >
+                  {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+                </button>
+              </div>
+            </form>
+          )}
+
           <p className="mt-5 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/login" className="font-medium text-primary hover:underline">

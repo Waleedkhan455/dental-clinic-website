@@ -25,6 +25,8 @@ export interface RegisterInput {
   email: string;
   phone?: string;
   password: string;
+  /** Verification code emailed by requestOtp(). */
+  otp: string;
 }
 
 export interface LoginInput {
@@ -40,6 +42,14 @@ export interface ProfileUpdateInput {
 
 export function registerRequest(input: RegisterInput): Promise<TokenResponse> {
   return apiFetch<TokenResponse>("/api/auth/register", { method: "POST", body: input });
+}
+
+/** Email a verification code to confirm the address before account creation. */
+export function requestOtp(email: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>("/api/auth/request-otp", {
+    method: "POST",
+    body: { email },
+  });
 }
 
 export function loginRequest(input: LoginInput): Promise<TokenResponse> {

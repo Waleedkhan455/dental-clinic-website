@@ -70,6 +70,33 @@ async def send_email(*, to: str, subject: str, text_body: str, html_body: str) -
         return False
 
 
+async def send_otp_email(*, to_email: str, code: str) -> bool:
+    """Email a one-time verification code used during account sign-up."""
+    subject = f"Your {CLINIC_NAME} verification code"
+    text_body = (
+        f"Your verification code is: {code}\n\n"
+        f"Enter this code to finish creating your account. It expires in 10 minutes.\n"
+        f"If you didn't request this, you can ignore this email.\n\n"
+        f"{CLINIC_NAME}\n"
+    )
+    html_body = f"""\
+<div style="background:#f8fafc;padding:24px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:480px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+    <div style="background:#1d4ed8;padding:20px 24px;">
+      <h1 style="margin:0;font-size:18px;color:#ffffff;">Verify your email</h1>
+    </div>
+    <div style="padding:24px;text-align:center;">
+      <p style="margin:0 0 16px;color:#475569;">Enter this code to finish creating your account:</p>
+      <div style="font-size:34px;font-weight:700;letter-spacing:8px;color:#1d4ed8;">{code}</div>
+      <p style="margin:16px 0 0;font-size:13px;color:#94a3b8;">This code expires in 10 minutes. If you didn't request it, you can ignore this email.</p>
+      <p style="margin:16px 0 0;font-weight:600;color:#0f172a;">{CLINIC_NAME}</p>
+    </div>
+  </div>
+</div>
+"""
+    return await send_email(to=to_email, subject=subject, text_body=text_body, html_body=html_body)
+
+
 def _format_when(scheduled_at: datetime) -> str:
     """Format a stored (UTC) appointment time in clinic-local time (PKT)."""
     aware = scheduled_at if scheduled_at.tzinfo else scheduled_at.replace(tzinfo=timezone.utc)

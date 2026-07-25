@@ -10,11 +10,19 @@ from pydantic import BaseModel, EmailStr, Field
 from app.models.user import UserPublic
 
 
+class OtpRequest(BaseModel):
+    """Request an email verification code before creating an account."""
+
+    email: EmailStr
+
+
 class RegisterRequest(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     phone: str | None = Field(default=None, max_length=40)
     password: str = Field(min_length=8, max_length=128)
+    # 6-digit code emailed to `email` by the request-otp step.
+    otp: str = Field(min_length=4, max_length=8)
 
 
 class LoginRequest(BaseModel):

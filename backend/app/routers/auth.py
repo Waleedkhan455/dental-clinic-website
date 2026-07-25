@@ -6,6 +6,7 @@ from app.core.security import create_access_token, hash_password, verify_passwor
 from app.dependencies import get_current_user
 from app.models.auth import (
     LoginRequest,
+    OtpRequest,
     ProfileUpdateRequest,
     RegisterRequest,
     TokenResponse,
@@ -13,6 +14,7 @@ from app.models.auth import (
 from app.models.common import UserRole, utcnow
 from app.models.user import UserInDB, UserPublic
 from app.repositories import users_repo
+from app.services.otp import create_and_send_otp, verify_otp
 
 
 def _to_public(user: UserInDB) -> UserPublic:
@@ -28,9 +30,22 @@ def _issue_token(user: UserInDB) -> TokenResponse:
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+@router.post("/request-otp", status_code=status.HTTP_200_OK)
+async def request_otp(body: OtpRequest) -> dict[str, str]:
+    """Email a verification code so sign-up can confirm the address is real."""
+    email = body.email.lower()
+    if await users_repo().find_one({"email": email}) is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists. Please sign in instead.",
+        )
+    await create_and_send_otp(email)
+    return {"message": "A verification code has been sent to your email."}
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(body: RegisterRequest) -> TokenResponse:
-    """Register a new patient and return an access token (auto-login)."""
+    """Register a new patient (after email verification) and auto-login."""
     repo = users_repo()
     email = body.email.lower()
     if await repo.find_one({"email": email}) is not None:
@@ -38,6 +53,9 @@ async def register(body: RegisterRequest) -> TokenResponse:
             status_code=status.HTTP_409_CONFLICT,
             detail="An account with this email already exists",
         )
+
+    # Confirm the emailed code before creating the account.
+    await verify_otp(email, body.otp)
 
     document = {
         "name": body.name,

@@ -42,4 +42,8 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
     # Gallery — ascending display order.
     await db[c.GALLERY].create_index("sort_order")
 
+    # Email verification codes — one active code per email, auto-expired by TTL.
+    await db[c.EMAIL_OTPS].create_index("email", unique=True)
+    await db[c.EMAIL_OTPS].create_index("expires_at", expireAfterSeconds=0)
+
     logger.info("MongoDB indexes ensured")
