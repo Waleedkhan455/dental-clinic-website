@@ -10,6 +10,7 @@ from app.models.auth import (
     ProfileUpdateRequest,
     RegisterRequest,
     TokenResponse,
+    VerifyOtpRequest,
 )
 from app.models.common import UserRole, utcnow
 from app.models.user import UserInDB, UserPublic
@@ -41,6 +42,13 @@ async def request_otp(body: OtpRequest) -> dict[str, str]:
         )
     await create_and_send_otp(email)
     return {"message": "A verification code has been sent to your email."}
+
+
+@router.post("/verify-otp", status_code=status.HTTP_200_OK)
+async def verify_otp_code(body: VerifyOtpRequest) -> dict[str, str]:
+    """Confirm the emailed code (without consuming it) before the password step."""
+    await verify_otp(body.email.lower(), body.otp, consume=False)
+    return {"message": "Email verified."}
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)

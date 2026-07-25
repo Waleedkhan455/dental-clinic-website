@@ -75,8 +75,12 @@ async def create_and_send_otp(email: str) -> None:
         )
 
 
-async def verify_otp(email: str, code: str) -> None:
-    """Validate ``code`` for ``email`` and consume it. Raises on any failure."""
+async def verify_otp(email: str, code: str, *, consume: bool = True) -> None:
+    """Validate ``code`` for ``email``. Raises on any failure.
+
+    ``consume=False`` checks the code without deleting it (used by the verify
+    step, so the final account-creation step can validate it again).
+    """
     col = get_database()[c.EMAIL_OTPS]
     now = _utcnow()
 
@@ -105,5 +109,6 @@ async def verify_otp(email: str, code: str) -> None:
             detail="Incorrect verification code.",
         )
 
-    # Success — consume the code so it can't be reused.
-    await col.delete_one({"email": email})
+    # Valid. Consume it (single-use) only when finalising registration.
+    if consume:
+        await col.delete_one({"email": email})

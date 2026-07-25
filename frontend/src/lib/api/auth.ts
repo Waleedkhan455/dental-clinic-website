@@ -52,6 +52,14 @@ export function requestOtp(email: string): Promise<{ message: string }> {
   });
 }
 
+/** Check the emailed code (without consuming it) before the password step. */
+export function verifyOtp(email: string, otp: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>("/api/auth/verify-otp", {
+    method: "POST",
+    body: { email, otp },
+  });
+}
+
 export function loginRequest(input: LoginInput): Promise<TokenResponse> {
   return apiFetch<TokenResponse>("/api/auth/login", { method: "POST", body: input });
 }

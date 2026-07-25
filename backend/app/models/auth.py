@@ -16,6 +16,13 @@ class OtpRequest(BaseModel):
     email: EmailStr
 
 
+class VerifyOtpRequest(BaseModel):
+    """Check an emailed code (without consuming it) before setting a password."""
+
+    email: EmailStr
+    otp: str = Field(min_length=4, max_length=8)
+
+
 class RegisterRequest(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
