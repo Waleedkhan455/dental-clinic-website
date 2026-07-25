@@ -1,10 +1,11 @@
 /**
  * Server-side data fetchers for the public website.
  *
- * These run in React Server Components. Data is fetched fresh (`no-store`) so
- * that changes made in the doctor panel appear immediately on the public site.
- * List fetchers degrade to an empty array on failure so a transient API issue
- * never crashes the whole page — the static content still renders.
+ * These run in React Server Components. Reads are cached and revalidated in the
+ * background (stale-while-revalidate) so pages serve instantly without a
+ * database round-trip on every request; doctor-panel edits appear within
+ * ~{@link REVALIDATE_SECONDS}s. List fetchers degrade to an empty array on
+ * failure so a transient API issue never crashes the whole page.
  */
 
 import { cache } from "react";
@@ -56,11 +57,12 @@ export interface GalleryImage {
   sort_order: number;
 }
 
-const FRESH = { cache: "no-store" } as const;
+export const REVALIDATE_SECONDS = 30;
+const CACHED = { next: { revalidate: REVALIDATE_SECONDS } } as const;
 
 export async function getDoctors(): Promise<Doctor[]> {
   try {
-    return await apiFetch<Doctor[]>("/api/doctors", FRESH);
+    return await apiFetch<Doctor[]>("/api/doctors", CACHED);
   } catch (error) {
     console.error("Failed to load doctors:", error);
     return [];
@@ -69,7 +71,7 @@ export async function getDoctors(): Promise<Doctor[]> {
 
 export async function getServices(): Promise<Service[]> {
   try {
-    return await apiFetch<Service[]>("/api/services", FRESH);
+    return await apiFetch<Service[]>("/api/services", CACHED);
   } catch (error) {
     console.error("Failed to load services:", error);
     return [];
@@ -80,7 +82,7 @@ export async function getServices(): Promise<Service[]> {
 // share a single fetch.
 export const getServiceBySlug = cache(async (slug: string): Promise<Service | null> => {
   try {
-    return await apiFetch<Service>(`/api/services/${encodeURIComponent(slug)}`, FRESH);
+    return await apiFetch<Service>(`/api/services/${encodeURIComponent(slug)}`, CACHED);
   } catch {
     return null;
   }
@@ -88,7 +90,7 @@ export const getServiceBySlug = cache(async (slug: string): Promise<Service | nu
 
 export async function getTestimonials(): Promise<Testimonial[]> {
   try {
-    return await apiFetch<Testimonial[]>("/api/testimonials", FRESH);
+    return await apiFetch<Testimonial[]>("/api/testimonials", CACHED);
   } catch (error) {
     console.error("Failed to load testimonials:", error);
     return [];
@@ -97,7 +99,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 
 export async function getGallery(): Promise<GalleryImage[]> {
   try {
-    return await apiFetch<GalleryImage[]>("/api/gallery", FRESH);
+    return await apiFetch<GalleryImage[]>("/api/gallery", CACHED);
   } catch (error) {
     console.error("Failed to load gallery:", error);
     return [];

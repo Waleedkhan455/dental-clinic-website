@@ -26,8 +26,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-// Always render fresh so doctor-panel changes appear immediately.
-export const dynamic = "force-dynamic";
+// Cached and revalidated in the background so the page serves instantly;
+// doctor-panel edits appear within ~30s.
+export const revalidate = 30;
 
 const specialties = [
   {

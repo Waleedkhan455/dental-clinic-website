@@ -86,7 +86,7 @@ export function ServicesAdmin() {
     <div className="flex flex-col gap-6">
       <AdminHeader
         title="Services"
-        subtitle="Add, edit, or remove treatments. Changes appear on the public Services page instantly."
+        subtitle="Add, edit, or remove treatments. Changes appear on the public Services page within a minute."
         actionLabel="New service"
         onAction={() => setEditing("new")}
       />

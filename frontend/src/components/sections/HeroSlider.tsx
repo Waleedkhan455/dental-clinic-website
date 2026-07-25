@@ -21,7 +21,7 @@ interface Slide {
 }
 
 const IMG = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=70`;
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1280&q=60`;
 
 const SLIDES: Slide[] = [
   {

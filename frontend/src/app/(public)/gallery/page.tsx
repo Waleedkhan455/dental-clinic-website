@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Photos of Zimal Dental Clinic And Implant Center in Mansehra.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function GalleryPage() {
   const images = await getGallery();

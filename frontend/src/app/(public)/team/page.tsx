@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Meet the dentists at Zimal Dental Clinic — experienced clinicians and faculty affiliated with Ayub Medical College, with their qualifications and availability.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function TeamPage() {
   const doctors = await getDoctors();

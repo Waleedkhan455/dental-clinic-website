@@ -83,7 +83,7 @@ export function TeamAdmin() {
     <div className="flex flex-col gap-6">
       <AdminHeader
         title="Team"
-        subtitle="Manage the dentists shown on Meet Our Dentists. Changes appear on the public site instantly."
+        subtitle="Manage the dentists shown on Meet Our Dentists. Changes appear on the public site within a minute."
         actionLabel="New member"
         onAction={() => setEditing("new")}
       />

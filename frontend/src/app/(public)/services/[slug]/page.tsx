@@ -8,7 +8,7 @@ import { serviceImage } from "@/lib/serviceImage";
 import { buttonVariants } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 interface ServiceDetailProps {
   params: Promise<{ slug: string }>;

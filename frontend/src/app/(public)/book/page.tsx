@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: `Book a dental appointment at ${siteConfig.name} in ${siteConfig.location.city}.`,
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 // Access is restricted to authenticated patients by the proxy (see src/proxy.ts).
 export default async function BookPage() {

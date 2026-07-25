@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Explore dental services at Zimal Dental Clinic — general dentistry, implants, prosthodontics, orthodontics, cosmetic and pediatric care.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function ServicesPage() {
   const services = await getServices();
