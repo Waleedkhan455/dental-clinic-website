@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { HeroSlider } from "@/components/sections/HeroSlider";
-import { HomeWatermark } from "@/components/sections/HomeWatermark";
+import { BrandWatermark } from "@/components/BrandWatermark";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { clinicJsonLd } from "@/lib/seo";
 import { DoctorCard } from "@/components/sections/DoctorCard";
@@ -67,7 +67,7 @@ export default async function HomePage() {
       />
 
       {/* Fixed brand watermark behind the page (stays still while scrolling). */}
-      <HomeWatermark />
+      <BrandWatermark />
 
       {/* Hero slideshow */}
       <HeroSlider />

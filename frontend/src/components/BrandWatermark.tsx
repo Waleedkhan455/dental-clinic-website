@@ -1,16 +1,23 @@
+import { cn } from "@/lib/utils";
+
 /**
- * A large, faint blue brand watermark fixed behind the home page. Because it's
- * `position: fixed`, it stays put while the page scrolls over it. It sits at a
- * negative z-index so it paints above the white page background but behind all
- * content — showing through the sections that have no background of their own.
+ * A large, faint blue brand watermark fixed behind the page. Because it's
+ * `position: fixed`, it stays still while the page scrolls over it, and its
+ * negative z-index keeps it behind all content.
+ *
+ * `surface` adds the panel's light background to this layer — used inside the
+ * dashboard, whose own background would otherwise cover a negative-z element.
  */
-export function HomeWatermark() {
+export function BrandWatermark({ surface = false }: { surface?: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 flex select-none flex-col items-center justify-center overflow-hidden"
+      className={cn(
+        "pointer-events-none fixed inset-0 -z-10 flex select-none flex-col items-center justify-center overflow-hidden",
+        surface && "bg-surface-muted",
+      )}
     >
-      <div className="flex flex-col items-center opacity-[0.06]">
+      <div className="flex flex-col items-center opacity-[0.09]">
         <span className="flex h-40 w-40 items-center justify-center rounded-[2rem] bg-primary sm:h-52 sm:w-52">
           <ToothGlyph className="h-24 w-24 text-primary-foreground sm:h-32 sm:w-32" />
         </span>

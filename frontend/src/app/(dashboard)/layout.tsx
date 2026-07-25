@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/Button";
+import { BrandWatermark } from "@/components/BrandWatermark";
 
 /**
  * Shell for the authenticated panels (doctor + patient).
@@ -40,7 +41,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-muted">
+    <div className="flex min-h-screen flex-col">
+      <BrandWatermark surface />
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Logo />
