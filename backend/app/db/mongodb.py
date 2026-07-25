@@ -36,11 +36,14 @@ async def connect_to_mongo() -> None:
         serverSelectionTimeoutMS=5000,
         uuidRepresentation="standard",
     )
-    # Fail fast if the server cannot be reached.
-    await client.admin.command("ping")
-
+    # Store the handle immediately. Motor connects lazily and auto-reconnects, so
+    # keeping it means a transient network blip at startup no longer leaves the
+    # API permanently database-less — it recovers on its own once the network is
+    # back, without needing a restart.
     mongo.client = client
     mongo.database = client[settings.mongo_db_name]
+    # Verify connectivity now; raising lets the caller log/retry at startup.
+    await client.admin.command("ping")
     logger.info("Connected to MongoDB database '%s'", settings.mongo_db_name)
 
 
