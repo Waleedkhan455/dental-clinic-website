@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { HeroSlider } from "@/components/sections/HeroSlider";
+import { HomeWatermark } from "@/components/sections/HomeWatermark";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { clinicJsonLd } from "@/lib/seo";
 import { DoctorCard } from "@/components/sections/DoctorCard";
@@ -64,6 +65,9 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(clinicJsonLd()) }}
       />
+
+      {/* Fixed brand watermark behind the page (stays still while scrolling). */}
+      <HomeWatermark />
 
       {/* Hero slideshow */}
       <HeroSlider />
