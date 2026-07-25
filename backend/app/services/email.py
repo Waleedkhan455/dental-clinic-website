@@ -56,6 +56,7 @@ async def send_email(*, to: str, subject: str, text_body: str, html_body: str) -
 
     msg = EmailMessage()
     msg["From"] = f"{settings.smtp_from_name} <{settings.email_from}>"
+    msg["Reply-To"] = settings.email_from
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(text_body)

@@ -4,14 +4,18 @@ Codes live in a TTL-expired MongoDB collection. Times are stored as naive UTC to
 match what the Motor driver returns on read, so comparisons stay consistent.
 """
 
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 
+from app.core.config import get_settings
 from app.db import collections as c
 from app.db.mongodb import get_database
 from app.services.email import send_otp_email
+
+logger = logging.getLogger(__name__)
 
 OTP_TTL = timedelta(minutes=10)
 RESEND_COOLDOWN = timedelta(seconds=30)
@@ -55,6 +59,11 @@ async def create_and_send_otp(email: str) -> None:
         },
         upsert=True,
     )
+
+    # Dev convenience: surface the code in the server log so local testing works
+    # even if email is slow or filtered. Never logged in production.
+    if get_settings().environment == "development":
+        logger.warning("DEV ONLY - verification code for %s is %s", email, code)
 
     sent = await send_otp_email(to_email=email, code=code)
     if not sent:
