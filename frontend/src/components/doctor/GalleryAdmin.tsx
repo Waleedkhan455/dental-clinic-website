@@ -76,7 +76,6 @@ export function GalleryAdmin() {
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-medium text-foreground">{img.caption || "Untitled"}</p>
                     <p className="text-xs text-muted-foreground">Order: {img.sort_order}</p>
                   </div>
                   <div className="flex shrink-0 gap-2">
@@ -128,7 +127,6 @@ function GalleryFormModal({
   onSubmit: (input: GalleryInput) => void;
 }) {
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
-  const [caption, setCaption] = useState(initial?.caption ?? "");
   const [sortOrder, setSortOrder] = useState(String(initial?.sort_order ?? 0));
   const [error, setError] = useState<string | null>(null);
 
@@ -137,7 +135,7 @@ function GalleryFormModal({
       setError("Please upload an image.");
       return;
     }
-    onSubmit({ image_url: imageUrl.trim(), caption: caption.trim() || null, sort_order: Number(sortOrder) || 0 });
+    onSubmit({ image_url: imageUrl.trim(), caption: null, sort_order: Number(sortOrder) || 0 });
   }
 
   return (
@@ -160,7 +158,6 @@ function GalleryFormModal({
           onChange={(url) => setImageUrl(url ?? "")}
           helperText="Upload a clinic photo (JPG/PNG, under 5 MB)."
         />
-        <Input label="Caption" value={caption} onChange={(e) => setCaption(e.target.value)} helperText="Optional." />
         <Input label="Sort order" type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} helperText="Lower shows first." />
       </div>
     </Modal>
