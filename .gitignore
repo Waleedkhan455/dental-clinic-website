@@ -43,3 +43,6 @@ desktop.ini
 *.log
 logs/
 tmp/
+
+# ---- Local credential notes (never commit) ----
+doctor@zimaldental.com.txt
