@@ -83,6 +83,9 @@ export default async function HomePage() {
               visit — from a routine checkup to a full smile makeover — feels comfortable and
               clear.
             </p>
+            <p className="mt-3 text-sm font-medium text-primary">
+              Same-day emergency appointments are available — just call or message us.
+            </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {specialties.map(({ icon: Icon, title, description }) => (
